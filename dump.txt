@@ -1,0 +1,11 @@
+digraph{
+	Z[shape = record, style="filled",fillcolor="lightgreen", label="{value = *}"];
+	Z -> ZL
+	ZL[shape = record, style="filled",fillcolor="lightblue", label="{value = x}"];
+	Z -> ZR
+	ZR[shape = record, style="filled",fillcolor="lightgreen", label="{value = +}"];
+	ZR -> ZRL
+	ZRL[shape = record, style="filled",fillcolor="lightblue", label="{value = y}"];
+	ZR -> ZRR
+	ZRR[shape = record, style="filled",fillcolor="yellow", label="{value = 6.000000}"];
+}
