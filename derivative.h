@@ -77,7 +77,7 @@ node_t* read_node(char** buffer, node_t* parent, tree_t* tree);
 bool check_operation(node_t** node, char* str, node_t* parent);
 tree_errors make_new_var(node_t** node, char* str, tree_t* tree, node_t* parent);
 
-bool check_file_founded(int argc, unsigned int number_of_files);
+bool check_file_founded(int argc, int number_of_files);
 
 node_t* node_derivate(node_t* node, tree_t* tree, node_t* parent, char* derivating_variable);
 node_t* node_copy(node_t* node, node_t* parent);

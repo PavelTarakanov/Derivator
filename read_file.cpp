@@ -44,10 +44,10 @@ tree_errors read_tree(char* const file_name, tree_t* tree)
         }
     }
 
-    //for (int i = 0; i < buffer_len; i++)
-    //    printf("%c", buffer[i]);
+    for (int i = 0; i < buffer_len; i++)
+        printf("%c", buffer[i]);
 
-    //printf("\n");
+    printf("\n");
 
     buffer_begin = buffer;
 
@@ -115,9 +115,11 @@ node_t* read_node(char** buffer, node_t* parent, tree_t* tree)
         }
         else
         {
+            //printf("buffer before for = %c\n", **buffer);
             for (int i = 0; i < MAX_LEN; i++)
             {
-                if ((*buffer)[i] != '(' && (*buffer)[i] != 'n' && (*buffer)[i+1] != 'i' && (*buffer)[i+2] != 'l')
+                //printf("buffer[%d] = %c\n", i, **buffer);
+                if ((*buffer)[i] != '(' && !((*buffer)[i] == 'n' && (*buffer)[i+1] == 'i' && (*buffer)[i+2] == 'l'))
                     str[i] = (*buffer)[i];
                 else
                 {
