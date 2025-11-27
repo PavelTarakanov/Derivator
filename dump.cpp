@@ -19,7 +19,8 @@ tree_errors tree_dump(node_t* root, tree_t* tree)
 
     fprintf(dump_address, "digraph{\n");
 
-    node_pointer_dump(root, dump_address, root_address);
+    if (node_pointer_dump(root, dump_address, root_address))
+        return DUMP_ERROR;
 
     fprintf(dump_address, "}");
 
@@ -40,7 +41,8 @@ tree_errors tree_dump(node_t* root, tree_t* tree)
 
     fprintf(dump_address, "digraph{\n");
 
-    node_visual_dump(root, dump_address, root_address, tree);
+    if (node_visual_dump(root, dump_address, root_address, tree))
+        return DUMP_ERROR;
 
     fprintf(dump_address, "}");
 
@@ -49,6 +51,139 @@ tree_errors tree_dump(node_t* root, tree_t* tree)
 
     if (system("dot dump.txt -T png -o visual_dump.png") != 0)
         return GRAPH_MAKING_ERROR;
+
+    if (check_file_opening("latex_dump.tex" , &dump_address, "w+"))
+        return FILE_OPENING_ERROR;
+
+    fprintf(dump_address, "$");
+
+    if (node_latex_dump(root, tree, dump_address))
+        return DUMP_ERROR;
+
+    fprintf(dump_address, "$");
+
+    if (check_file_closing(dump_address))
+        return FILE_CLOSING_ERROR;
+
+    return NO_ERROR;
+}
+
+tree_errors node_latex_dump(node_t* node, tree_t* tree, FILE* const dump_address)
+{
+    assert(node);
+    assert(tree);
+    assert(dump_address);
+
+    if (node->type == NUMBER_TYPE)
+        fprintf(dump_address, "%lf", node->value.number_value);
+    else if (node->type == VARIABLE_TYPE)
+        fprintf(dump_address, "%s", tree->variable_list[node->value.variable_number].var_name);
+    else if (node->type == OPERATOR_TYPE)
+    {
+        if (node->value.operator_name < SIN && node->value.operator_name != DIV)
+        {
+            fprintf(dump_address, "(");
+
+            node_latex_dump(node->left, tree, dump_address);
+
+            switch(node->value.operator_name)
+            {
+                case ADD:
+                    fprintf(dump_address, "+");
+                    break;
+                case SUB:
+                    fprintf(dump_address, "-");
+                    break;
+                case MUL:
+                    fprintf(dump_address, "*");
+                    break;
+                case DEG:
+                    fprintf(dump_address, "^");
+                    break;
+                default:
+                    printf("ERROR! Unknown operator!\n");
+                    return UNKNOWN_OPERATOR_ERROR;
+            }
+            node_latex_dump(node->right, tree, dump_address);
+            fprintf(dump_address, ")");
+        }
+        else if (node->value.operator_name == DIV)
+        {
+            fprintf(dump_address, "\\frac{");
+
+            node_latex_dump(node->left, tree, dump_address);
+
+            fprintf(dump_address, "}{");
+
+            node_latex_dump(node->right, tree, dump_address);
+
+            fprintf(dump_address, "}");
+        }
+        else if (node->value.operator_name > DEG && node->value.operator_name < EXP)
+        {
+            switch(node->value.operator_name)
+            {
+                case SIN:
+                    fprintf(dump_address, "\\sin(");
+                    break;
+                case COS:
+                    fprintf(dump_address, "\\cos(");
+                    break;
+                case TG:
+                    fprintf(dump_address, "\\tan(");
+                    break;
+                case CTG:
+                    fprintf(dump_address, "\\cot(");
+                    break;
+                case ARCSIN:
+                    fprintf(dump_address, "\\arcsin(");
+                    break;
+                case ARCCOS:
+                    fprintf(dump_address, "\\arccos(");
+                    break;
+                case ARCTG:
+                    fprintf(dump_address, "\\arctan(");
+                    break;
+                case ARCCTG:
+                    fprintf(dump_address, "\\arccot(");
+                    break;
+                case LN:
+                    fprintf(dump_address, "\\ln");
+                    break;
+                default:
+                    printf("ERROR! Unknown operator!\n");
+                    return UNKNOWN_OPERATOR_ERROR;
+            }
+
+            node_latex_dump(node->left, tree, dump_address);
+            fprintf(dump_address, ")");
+        }
+        else if (node->value.operator_name == EXP)
+        {
+            fprintf(dump_address, "e^{");
+            node_latex_dump(node->left, tree, dump_address);
+            fprintf(dump_address, "}");
+        }
+        else if(node->value.operator_name == LN)
+        {
+            fprintf(dump_address, "\\ln{");
+            node_latex_dump(node->left, tree, dump_address);
+            fprintf(dump_address, "}");
+        }
+        else if (node->value.operator_name == SQRT)
+        {
+            fprintf(dump_address, "\\sqrt{");
+            node_latex_dump(node->left, tree, dump_address);
+            fprintf(dump_address, "}");
+        }
+        else
+        {
+            printf("ERROR! Unknown operator");
+            return UNKNOWN_OPERATOR_ERROR;
+        }
+    }
+    else
+        return UNKNOWN_OPERATOR_ERROR;
 
     return NO_ERROR;
 }
@@ -69,17 +204,17 @@ tree_errors node_pointer_dump(node_t* node, FILE* const dump_address, char* node
     strcpy(right_way, node_way);
 
     if (node->left == NULL && node->right == NULL)
-        fprintf(dump_address, "\t%s[color=\"black\", style=\"filled\",fillcolor=\"lightgrey\", shape = record, label=\"{parent = %p | value = %lf | {left = %s | right = %s}}\"];\n",
-                node_way, node->parent, node->value, "NULL", "NULL");
+        fprintf(dump_address, "\t%s[color=\"black\", style=\"filled\",fillcolor=\"lightgrey\", shape = record, label=\"{parent = %p | {left = %s | right = %s}}\"];\n",
+                node_way, node->parent, "NULL", "NULL");
     else if (node->left == NULL)
-        fprintf(dump_address, "\t%s[color=\"black\", style=\"filled\",fillcolor=\"lightgrey\", shape = record, label=\"{parent = %p | value = %lf | {left = %s | right = %p}}\"];\n",
-            node_way, node->parent, node->value, "NULL" , node->right);
+        fprintf(dump_address, "\t%s[color=\"black\", style=\"filled\",fillcolor=\"lightgrey\", shape = record, label=\"{parent = %p | {left = %s | right = %p}}\"];\n",
+            node_way, node->parent, "NULL" , node->right);
     else if (node->right == NULL)
-        fprintf(dump_address, "\t%s[color=\"black\", style=\"filled\",fillcolor=\"lightgrey\", shape = record, label=\"{parent = %p | value = %lf | {left = %p | right = %s}}\"];\n",
-            node_way, node->parent, node->value, node->left, "NULL");
+        fprintf(dump_address, "\t%s[color=\"black\", style=\"filled\",fillcolor=\"lightgrey\", shape = record, label=\"{parent = %p | {left = %p | right = %s}}\"];\n",
+            node_way, node->parent, node->left, "NULL");
     else
-        fprintf(dump_address, "\t%s[color=\"black\", style=\"filled\",fillcolor=\"lightgrey\", shape = record, label=\"{parent = %p | value = %lf | {left = %p | right = %p}}\"];\n",
-            node_way, node->parent, node->value, node->left, node->right);
+        fprintf(dump_address, "\t%s[color=\"black\", style=\"filled\",fillcolor=\"lightgrey\", shape = record, label=\"{parent = %p | {left = %p | right = %p}}\"];\n",
+            node_way, node->parent,  node->left, node->right);
 
     if (node->left != NULL)
     {
@@ -161,14 +296,14 @@ tree_errors print_label(FILE* dump_address, node_t* node, tree_t* tree)
     assert(node);
 
     if (node->type == NUMBER_TYPE)
-        fprintf(dump_address, "label=\"{value = %lf}\"];\n", node->value);
+        fprintf(dump_address, "label=\"{%lf}\"];\n", node->value.number_value);
     else if (node->type == OPERATOR_TYPE)
     {
         if (operator_print(dump_address, node))
             return UNKNOWN_OPERATOR_ERROR;
     }
     else if (node->type == VARIABLE_TYPE)
-        fprintf(dump_address, "label=\"{value = %s}\"];\n", tree->variable_list[(int) node->value].var_name);
+        fprintf(dump_address, "label=\"{%s}\"];\n", tree->variable_list[node->value.variable_number].var_name);
 
     return NO_ERROR;
 }
@@ -178,52 +313,55 @@ tree_errors operator_print(FILE* dump_address, node_t* node)
     assert(dump_address);
     assert(node);
 
-    switch((int)node->value)
+    switch(node->value.operator_name)
     {
         case ADD:
-            fprintf(dump_address, "label=\"{value = +}\"];\n");
+            fprintf(dump_address, "label=\"{+}\"];\n");
             break;
         case SUB:
-            fprintf(dump_address, "label=\"{value = -}\"];\n");
+            fprintf(dump_address, "label=\"{-}\"];\n");
             break;
         case MUL:
-            fprintf(dump_address, "label=\"{value = *}\"];\n");
+            fprintf(dump_address, "label=\"{*}\"];\n");
             break;
         case DIV:
-            fprintf(dump_address, "label=\"{value = /}\"];\n");
+            fprintf(dump_address, "label=\"{/}\"];\n");
             break;
         case DEG:
-            fprintf(dump_address, "label=\"{value = ^}\"];\n");
+            fprintf(dump_address, "label=\"{^}\"];\n");
             break;
         case SIN:
-            fprintf(dump_address, "label=\"{value = sin}\"];\n");
+            fprintf(dump_address, "label=\"{sin}\"];\n");
             break;
         case COS:
-            fprintf(dump_address, "label=\"{value = cos}\"];\n");
+            fprintf(dump_address, "label=\"{cos}\"];\n");
             break;
         case TG:
-            fprintf(dump_address, "label=\"{value = tg}\"];\n");
+            fprintf(dump_address, "label=\"{tg}\"];\n");
             break;
         case CTG:
-            fprintf(dump_address, "label=\"{value = ctg}\"];\n");
+            fprintf(dump_address, "label=\"{ctg}\"];\n");
             break;
         case ARCSIN:
-            fprintf(dump_address, "label=\"{value = arcsin}\"];\n");
+            fprintf(dump_address, "label=\"{arcsin}\"];\n");
             break;
         case ARCCOS:
-            fprintf(dump_address, "label=\"{value = arccos}\"];\n");
+            fprintf(dump_address, "label=\"{arccos}\"];\n");
             break;
         case ARCTG:
-            fprintf(dump_address, "label=\"{value = arctg}\"];\n");
+            fprintf(dump_address, "label=\"{arctg}\"];\n");
             break;
         case ARCCTG:
-            fprintf(dump_address, "label=\"{value = arcctg}\"];\n");
+            fprintf(dump_address, "label=\"{arcctg}\"];\n");
             break;
         case EXP:
-            fprintf(dump_address, "label=\"{value = exp}\"];\n");
+            fprintf(dump_address, "label=\"{exp}\"];\n");
             break;
         case LN:
-            fprintf(dump_address, "label=\"{value = ln}\"];\n");
+            fprintf(dump_address, "label=\"{ln}\"];\n");
+            break;
+        case SQRT:
+            fprintf(dump_address, "label=\"{sqrt}\"]\n");
             break;
         default:
             printf("ERROR: unknown operator");

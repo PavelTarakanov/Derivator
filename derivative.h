@@ -1,8 +1,6 @@
 #ifndef DERIVATIVE_H
 #define DERIVATIVE_H
 
-typedef double tree_elem_t;
-
 enum type_t{
     OPERATOR_TYPE = 0,
     VARIABLE_TYPE = 1,
@@ -25,7 +23,13 @@ enum operations_t{
     ARCCTG = 13,
     EXP = 14,
     LN = 15,
+    SQRT = 16,
 };
+
+union tree_elem_t{operations_t operator_name;
+                  double number_value;
+                  int variable_number;};
+
 
 struct node_t{tree_elem_t value;
               type_t type;
@@ -56,15 +60,17 @@ enum tree_errors{
     WAY_READING_ERROR = 8,
     TYPE_ERROR = 9,
     UNKNOWN_OPERATOR_ERROR = 10,
+    DUMP_ERROR = 11,
 };
 
 tree_errors tree_init(tree_t** tree);
 void tree_destroy(tree_t* tree);
 
-tree_errors node_init(node_t** node, double value, type_t type, node_t* parent);
+tree_errors node_init(node_t** node, tree_elem_t value, type_t type, node_t* parent);
 void node_destroy(node_t* node);
 
 tree_errors tree_dump(node_t* root, tree_t* tree);
+tree_errors node_latex_dump(node_t* node, tree_t* tree, FILE* const dump_address);
 tree_errors node_pointer_dump(node_t* node, FILE* const dump_address, char* node_way);
 tree_errors node_visual_dump(node_t* node, FILE* const dump_address, char* node_way, tree_t* tree);
 tree_errors print_label(FILE* dump_address, node_t* node, tree_t* tree);
@@ -79,7 +85,23 @@ tree_errors make_new_var(node_t** node, char* str, tree_t* tree, node_t* parent)
 
 bool check_file_founded(int argc, int number_of_files);
 
-node_t* node_derivate(node_t* node, tree_t* tree, node_t* parent, char* derivating_variable);
+node_t* node_derivate(node_t* node, const tree_t* const tree, node_t* parent,const char* const derivating_variable);
 node_t* node_copy(node_t* node, node_t* parent);
+
+node_t* add_derivate(node_t* node, const tree_t* const tree, node_t* parent, const char* const derivating_variable);
+node_t* sub_derivate(node_t* node, const tree_t* const tree, node_t* parent, const char* const derivating_variable);
+node_t* mul_derivate(node_t* node, const tree_t* const tree, node_t* parent, const char* const derivating_variable);
+
+int infix_read(char* file_name);
+
+int get_g(char** buffer);
+int get_e(char** buffer);
+int get_t(char** buffer);
+int get_p(char** buffer);
+int get_n(char** buffer);
+
+node_t* equation_simplification(node_t* node, tree_t* tree);
+node_t* number_calculate(node_t* node, tree_t* tree);
+
 
 #endif //DERIVATIVE_H

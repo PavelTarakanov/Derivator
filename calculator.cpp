@@ -14,15 +14,16 @@
 
 double node_calculate(node_t* node, tree_t* tree)
 {
+    assert(node);
     assert(tree);
 
     if (node->type == NUMBER_TYPE)
-        return node->value;
+        return node->value.number_value;
     else if (node->type == VARIABLE_TYPE)
-        return tree->variable_list[(int) node->value].var_value;
+        return tree->variable_list[node->value.variable_number].var_value;
     else if (node->type == OPERATOR_TYPE)
     {
-        switch((int)node->value)
+        switch(node->value.operator_name)
         {
         case ADD:
             return LV + RV;
@@ -54,6 +55,8 @@ double node_calculate(node_t* node, tree_t* tree)
             return exp(LV);
         case LN:
             return log(LV);
+        case SQRT:
+            return sqrt(LV);
         default:
             printf("ERROR: unknown operator");
             return NAN;

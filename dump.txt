@@ -1,17 +1,17 @@
 digraph{
-	Z[shape = record, style="filled",fillcolor="lightgreen", label="{value = *}"];
+	Z[shape = record, style="filled",fillcolor="lightgreen", label="{/}"];
 	Z -> ZL
-	ZL[shape = record, style="filled",fillcolor="lightgreen", label="{value = /}"];
-	ZL -> ZLL
-	ZLL[shape = record, style="filled",fillcolor="yellow", label="{value = 1.000000}"];
-	ZL -> ZLR
-	ZLR[shape = record, style="filled",fillcolor="lightgreen", label="{value = ^}"];
-	ZLR -> ZLRL
-	ZLRL[shape = record, style="filled",fillcolor="lightgreen", label="{value = cos}"];
-	ZLRL -> ZLRLL
-	ZLRLL[shape = record, style="filled",fillcolor="lightblue", label="{value = x}"];
-	ZLR -> ZLRR
-	ZLRR[shape = record, style="filled",fillcolor="yellow", label="{value = 2.000000}"];
+	ZL[shape = record, style="filled",fillcolor="yellow", label="{1.000000}"];
 	Z -> ZR
-	ZR[shape = record, style="filled",fillcolor="yellow", label="{value = 1.000000}"];
+	ZR[shape = record, style="filled",fillcolor="lightgreen", label="{*}"];
+	ZR -> ZRL
+	ZRL[shape = record, style="filled",fillcolor="yellow", label="{2.000000}"];
+	ZR -> ZRR
+	ZRR[shape = record, style="filled",fillcolor="lightgreen", label="{sqrt}"]
+	ZRR -> ZRRL
+	ZRRL[shape = record, style="filled",fillcolor="lightgreen", label="{+}"];
+	ZRRL -> ZRRLL
+	ZRRLL[shape = record, style="filled",fillcolor="lightblue", label="{x}"];
+	ZRRL -> ZRRLR
+	ZRRLR[shape = record, style="filled",fillcolor="yellow", label="{6.000000}"];
 }

@@ -1,1 +1,2 @@
-(tg (x nil nil) nil)
+(sqrt (+ (x nil nil)
+       (6 nil nil)) nil);

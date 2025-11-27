@@ -28,15 +28,17 @@ tree_errors tree_init(tree_t** tree)
     return NO_ERROR;
 }
 
-tree_errors node_init(node_t** node, double value, type_t type, node_t* parent)
+tree_errors node_init(node_t** node, tree_elem_t value, type_t type, node_t* parent)
 {
+    assert(node);
+
     *node = (node_t*) calloc(1, sizeof(node_t));
 
     if (*node == NULL)
         return ALLOCATION_ERROR;
 
-    (*node)->value = value;
     (*node)->type = type;
+    (*node)->value = value;
     (*node)->left = NULL;
     (*node)->right = NULL;
     (*node)->parent = parent;
@@ -60,6 +62,8 @@ void node_destroy(node_t* node)
 
 void tree_destroy(tree_t* tree)
 {
+    assert(tree);
+
     node_destroy(tree->root);
 
     for (int i = 0; i < tree->number_of_variables; i++)
