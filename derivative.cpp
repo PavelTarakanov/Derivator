@@ -7,389 +7,105 @@
 #include "file_using.h"
 #include "derivative.h"
 
-#define dL node_derivate(node->left, tree, new_node, derivating_variable)
-#define dR node_derivate(node->right, tree, new_node, derivating_variable)
+#define dL node_derivate(node->left, tree, derivating_variable)
+#define dR node_derivate(node->right, tree, derivating_variable)
+#define cL node_copy(node->left)
+#define cR node_copy(node->right)
+#define NUM_(value) node_init((tree_elem_t) {.number_value = value}, NUMBER_TYPE, NULL, NULL)
+#define ADD_(left, right) node_init((tree_elem_t) {.operator_name = ADD}, OPERATOR_TYPE, left, right)
+#define SUB_(left, right) node_init((tree_elem_t) {.operator_name = SUB}, OPERATOR_TYPE, left, right)
+#define MUL_(left, right) node_init((tree_elem_t) {.operator_name = MUL}, OPERATOR_TYPE, left, right)
+#define DIV_(left, right) node_init((tree_elem_t) {.operator_name = DIV}, OPERATOR_TYPE, left, right)
+#define DEG_(left, right) node_init((tree_elem_t) {.operator_name = DEG}, OPERATOR_TYPE, left, right)
+#define SIN_(left) node_init((tree_elem_t) {.operator_name = SIN}, OPERATOR_TYPE, left, NULL)
+#define COS_(left) node_init((tree_elem_t) {.operator_name = COS}, OPERATOR_TYPE, left, NULL)
+#define TG_(left) node_init((tree_elem_t) {.operator_name = TG}, OPERATOR_TYPE, left, NULL)
+#define CTG_(left) node_init((tree_elem_t) {.operator_name = CTG}, OPERATOR_TYPE, left, NULL)
+#define ARCSIN_(left) node_init((tree_elem_t) {.operator_name = ARCSIN}, OPERATOR_TYPE, left, NULL)
+#define ARCCOS_(left) node_init((tree_elem_t) {.operator_name = ARCCOS}, OPERATOR_TYPE, left, NULL)
+#define ARCTG_(left) node_init((tree_elem_t) {.operator_name = ARCTG}, OPERATOR_TYPE, left, NULL)
+#define ARCCTG_(left) node_init((tree_elem_t) {.operator_name = ARCCTG}, OPERATOR_TYPE, left, NULL)
+#define LN_(left) node_init((tree_elem_t) {.operator_name = LN}, OPERATOR_TYPE, left, NULL)
+#define EXP_(left) node_init((tree_elem_t) {.operator_name = EXP}, OPERATOR_TYPE, left, NULL)
+#define SQRT_(left) node_init((tree_elem_t) {.operator_name = SQRT}, OPERATOR_TYPE, left, NULL)
 
-node_t* node_derivate(node_t* node, const tree_t* const tree, node_t* parent, const char* const derivating_variable)
+node_t* node_derivate(node_t* node, const tree_t* const tree, const char* const derivating_variable)
 {
     assert(node);
     assert(tree);
     assert(derivating_variable);
 
-    node_t* new_node = NULL;
-    node_t* new_node_1 = NULL;
-    node_t* new_node_2 = NULL;
-    node_t* new_node_3 = NULL;
-    node_t* new_node_4 = NULL;
-    node_t* new_node_5 = NULL;
-    node_t* new_node_6 = NULL;
-    node_t* new_node_7 = NULL;
-    tree_elem_t value = {};
-
     if (node->type == NUMBER_TYPE)
-    {
-        value.number_value = 0;
-        node_init(&new_node, value, NUMBER_TYPE, parent);
-    }
+        return node_init((tree_elem_t) {.number_value = 0}, NUMBER_TYPE, NULL, NULL);
     else if (node->type == VARIABLE_TYPE)
     {
         if (strcmp(derivating_variable, tree->variable_list[node->value.variable_number].var_name) == 0)
-        {
-            value.number_value = 1;
-            node_init(&new_node, value, NUMBER_TYPE, parent);
-        }
+
+            return node_init((tree_elem_t) {.number_value = 1}, NUMBER_TYPE, NULL, NULL);
         else
-        {
-            value.number_value = 0;
-            node_init(&new_node, value, NUMBER_TYPE, parent);
-        }
+            return node_init((tree_elem_t) {.number_value = 1}, NUMBER_TYPE, NULL, NULL);
     }
-    else if (node->type == OPERATOR_TYPE)//TODO функции для всехпроизводных
+    else if (node->type == OPERATOR_TYPE)
     {
         switch(node->value.operator_name)
         {
             case ADD:
-                return add_derivate(node, tree, parent, derivating_variable);
+                return ADD_(dR, dL);
             case SUB:
-                return sub_derivate(node, tree, parent, derivating_variable);
+                return  SUB_(dR, dL);
             case MUL:
-                return mul_derivate(node, tree, parent, derivating_variable);
+                return ADD_(MUL_(dL, cR), MUL_(dR, cL));
             case DIV:
-                value.operator_name = DIV;
-                node_init(&new_node, value, OPERATOR_TYPE, parent);
-
-                value.operator_name = DEG;
-                node_init(&new_node_1, value, OPERATOR_TYPE, new_node);
-
-                value.operator_name = SUB;
-                node_init(&new_node_2, value, OPERATOR_TYPE, new_node);
-
-                value.operator_name = MUL;
-                node_init(&new_node_3, value, OPERATOR_TYPE, new_node_2);
-                node_init(&new_node_4, value, OPERATOR_TYPE, new_node_2);
-
-                value.number_value = 2;
-                node_init(&new_node_5, value, NUMBER_TYPE, new_node_1);
-
-                new_node->left = new_node_2;
-                new_node->right = new_node_1;
-                new_node_1->left = node_copy(node->right, new_node_1);
-                new_node_1->right = new_node_5;
-                new_node_2->left = new_node_3;
-                new_node_2->right = new_node_4;
-                new_node_3->left = dL;
-                new_node_3->right = node_copy(node->right, new_node_3);
-                new_node_4->left = dR;
-                new_node_4->right = node_copy(node->left, new_node_4);
-
-                break;
+                return DIV_(SUB_(MUL_(dL, cR), MUL_(dR, cL)), DEG_(cR, NUM_(2)));
             case DEG:
                 if (node->left->type == NUMBER_TYPE)
-                {
-                    value.operator_name = MUL;
-                    node_init(&new_node, value, OPERATOR_TYPE, parent);
-                    node_init(&new_node_1, value, OPERATOR_TYPE, new_node);
-
-                    value.operator_name = LN;
-                    node_init(&new_node_2, value, OPERATOR_TYPE, new_node);
-
-                    value.operator_name = DEG;
-                    node_init(&new_node_3, value, OPERATOR_TYPE, new_node_1);
-
-                    new_node->left = new_node_2;
-                    new_node->right = new_node_1;
-                    new_node_1->left = new_node_3;
-                    new_node_1->right = dR;
-                    new_node_2->left = node_copy(node->left, new_node_2);
-                    new_node_3->left = node_copy(node->left, new_node_3);
-                    new_node_3->right = node_copy(node->right, new_node_3);
-                }
+                    return MUL_(dR, MUL_(LN_(cL), DEG_(cL, cR)));
                 else if (node->right->type == NUMBER_TYPE)
-                {
-                    value.operator_name = MUL;
-                    node_init(&new_node, value, OPERATOR_TYPE, parent);
-                    node_init(&new_node_1, value, OPERATOR_TYPE, new_node);
-
-                    value.number_value = node->right->value.number_value;
-                    node_init(&new_node_2, value, NUMBER_TYPE, new_node);
-
-                    value.operator_name = DEG;
-                    node_init(&new_node_3, value, OPERATOR_TYPE, new_node_1);
-
-                    value.number_value = node->right->value.number_value - 1;
-                    node_init(&new_node_4, value, NUMBER_TYPE, new_node_3);
-
-                    new_node->left = new_node_2;
-                    new_node->right = new_node_1;
-                    new_node_1->left = new_node_3;
-                    new_node_1->right = dL;
-                    new_node_3->left = node_copy(node->left, new_node_3);
-                    new_node_3->right = new_node_4;
-                }
-
-                break;
+                    return MUL_(dL, MUL_(cR, DEG_(cL, SUB_(cR, NUM_(1)))));
+                else
+                    return NULL;//TODO
             case SIN:
-                value.operator_name = MUL;
-                node_init(&new_node, value, OPERATOR_TYPE, parent);
-
-                value.operator_name = COS;
-                node_init(&new_node_1, value, OPERATOR_TYPE, new_node);
-
-                new_node->left = dL;
-                new_node->right = new_node_1;
-                new_node_1->left = node_copy(node->left, new_node_1);
-                break;
+                return MUL_(dL, COS_(cL));
             case COS:
-                value.operator_name = MUL;
-                node_init(&new_node, value, OPERATOR_TYPE, parent);
-                node_init(&new_node_1, value, OPERATOR_TYPE, new_node);
-
-                value.number_value = MUL;
-                node_init(&new_node_2, value, NUMBER_TYPE, new_node_1);
-
-                value.operator_name = SIN;
-                node_init(&new_node_3, value, OPERATOR_TYPE, new_node_1);
-
-                new_node->left = dL;
-                new_node->right = new_node_1;
-                new_node_1->left = new_node_2;
-                new_node_1->right = new_node_3;
-                new_node_3->left = node_copy(node->left, new_node_3);
-
-                break;
+                return MUL_(dL, MUL_(NUM_(-1), SIN_(cL)));
             case TG:
-                value.operator_name = MUL;
-                node_init(&new_node, value, OPERATOR_TYPE, parent);
-
-                value.operator_name = DIV;
-                node_init(&new_node_1, value, OPERATOR_TYPE, new_node);
-
-                value.number_value = 1;
-                node_init(&new_node_2, value, NUMBER_TYPE, new_node_1);
-
-                value.operator_name = DEG;
-                node_init(&new_node_3, value, OPERATOR_TYPE, new_node_1);
-
-                value.number_value = 2;
-                node_init(&new_node_4, value, NUMBER_TYPE, new_node_3);
-
-                value.operator_name = COS;
-                node_init(&new_node_5, value, OPERATOR_TYPE, new_node_3);
-
-                new_node->left = new_node_1;
-                new_node->right = dL;
-                new_node_1->left = new_node_2;
-                new_node_1->right = new_node_3;
-                new_node_3->left = new_node_5;
-                new_node_3->right = new_node_4;
-                new_node_5->left = node_copy(node->left, new_node_5);
-
-                break;
+                return DIV_(dL, DEG_(COS_(cL), NUM_(2)));
             case CTG:
-                value.operator_name = MUL;
-                node_init(&new_node, value, OPERATOR_TYPE, parent);
-
-                value.operator_name = DIV;
-                node_init(&new_node_1, value, OPERATOR_TYPE, new_node);
-
-                value.number_value = -1;
-                node_init(&new_node_2, value, NUMBER_TYPE, new_node_1);
-
-                value.operator_name = DEG;
-                node_init(&new_node_3, value, OPERATOR_TYPE, new_node_1);
-
-                value.number_value = 2;
-                node_init(&new_node_4, value, NUMBER_TYPE, new_node_3);
-
-                value.operator_name = SIN;
-                node_init(&new_node_5, value, OPERATOR_TYPE, new_node_3);
-
-                new_node->left = new_node_1;
-                new_node->right = dL;
-                new_node_1->left = new_node_2;
-                new_node_1->right = new_node_3;
-                new_node_3->left = new_node_5;
-                new_node_3->right = new_node_4;
-                new_node_5->left = node_copy(node->left, new_node_5);
-                break;
+                return MUL_(dL, DIV_(NUM_(-1), DEG_(SIN_(cL), NUM_(2))));
             case ARCSIN:
-                value.operator_name = DIV;
-                node_init(&new_node, value, OPERATOR_TYPE, parent);
-
-                value.operator_name = SQRT;
-                node_init(&new_node_1, value, OPERATOR_TYPE, new_node);
-
-                value.operator_name = SUB;
-                node_init(&new_node_2, value, OPERATOR_TYPE, new_node_1);
-
-                value.number_value = 1;
-                node_init(&new_node_3, value, NUMBER_TYPE, new_node_2);
-
-                value.operator_name = DEG;
-                node_init(&new_node_4, value, OPERATOR_TYPE, new_node_2);
-
-                value.number_value = 2;
-                node_init(&new_node_5, value, NUMBER_TYPE, new_node_4);
-
-                new_node->left = dL;
-                new_node->right = new_node_1;
-                new_node_1->left = new_node_2;
-                new_node_2->left = new_node_3;
-                new_node_2->right = new_node_4;
-                new_node_4->left = node_copy(node->left, new_node_4);
-                new_node_4->right = new_node_5;
-
-                break;
+                return DIV_(dL, SQRT_(SUB_(NUM_(1), DEG_(cL, NUM_(2)))));
             case ARCCOS:
-                value.operator_name = MUL;
-                node_init(&new_node, value, OPERATOR_TYPE, parent);
-
-                value.operator_name = DIV;
-                node_init(&new_node_1, value, OPERATOR_TYPE, new_node);
-
-                value.number_value = -1;
-                node_init(&new_node_2, value, NUMBER_TYPE, new_node);
-
-                value.operator_name = SQRT;
-                node_init(&new_node_3, value, OPERATOR_TYPE, new_node_1);
-
-                value.operator_name = SUB;
-                node_init(&new_node_4, value, OPERATOR_TYPE, new_node_3);
-
-                value.number_value = 1;
-                node_init(&new_node_5, value, NUMBER_TYPE, new_node_4);
-
-                value.operator_name = DEG;
-                node_init(&new_node_6, value, OPERATOR_TYPE, new_node_4);
-
-                value.number_value = 2;
-                node_init(&new_node_7, value, NUMBER_TYPE, new_node_6);
-
-                new_node->left = dL;
-                new_node->right = new_node_1;
-                new_node_1->left = new_node_2;
-                new_node_1->right = new_node_3;
-                new_node_3->left = new_node_4;
-                new_node_4->left = new_node_5;
-                new_node_4->right = new_node_6;
-                new_node_6->left = node_copy(node->left, new_node_6);
-                new_node_6->right = new_node_7;
-                break;
+                return MUL_(NUM_(-1), DIV_(dL, SQRT_(SUB_(NUM_(1), DEG_(cL, NUM_(2))))));
             case ARCTG:
-                value.operator_name = DIV;
-                node_init(&new_node, value, OPERATOR_TYPE, parent);
-
-                value.operator_name = ADD;
-                node_init(&new_node_1, value, OPERATOR_TYPE, new_node);
-
-                value.number_value = 1;
-                node_init(&new_node_2, value, NUMBER_TYPE, new_node_1);
-
-                value.operator_name = DEG;
-                node_init(&new_node_3, value, OPERATOR_TYPE, new_node_1);
-
-                value.number_value = 2;
-                node_init(&new_node_4, value, NUMBER_TYPE, new_node_3);
-
-                new_node->left = dL;
-                new_node->right = new_node_1;
-                new_node_1->left = new_node_2;
-                new_node_1->right = new_node_3;
-                new_node_3->right = new_node_4;
-                new_node_3->left = node_copy(node->left, new_node_4);
-                break;
+                return DIV_(dL, ADD_(NUM_(1), DEG_(cL, NUM_(2))));
             case ARCCTG:
-                value.operator_name = MUL;
-                node_init(&new_node, value, OPERATOR_TYPE, parent);
-
-                value.operator_name = DIV;
-                node_init(&new_node_1, value, OPERATOR_TYPE, new_node);
-
-                value.number_value = -1;
-                node_init(&new_node_2, value, NUMBER_TYPE, new_node);
-
-                value.operator_name = ADD;
-                node_init(&new_node_3, value, OPERATOR_TYPE, new_node_1);
-
-                value.number_value = 1;
-                node_init(&new_node_4, value, NUMBER_TYPE, new_node_3);
-
-                value.operator_name = DEG;
-                node_init(&new_node_5, value, OPERATOR_TYPE, new_node_3);
-
-                value.number_value = 2;
-                node_init(&new_node_6, value, NUMBER_TYPE, new_node_5);
-
-                new_node->left = dL;
-                new_node->right = new_node_1;
-                new_node_1->left = new_node_2;
-                new_node_1->right = new_node_3;
-                new_node_3->left = new_node_4;
-                new_node_3->right = new_node_5;
-                new_node_5->left = node_copy(node->left, new_node_5);
-                new_node_5->right = new_node_6;
-                break;
+                return MUL_(NUM_(-1), DIV_(dL, ADD_(NUM_(1), DEG_(cL, NUM_(2)))));
             case EXP:
-                value.operator_name = MUL;
-                node_init(&new_node, value, OPERATOR_TYPE, parent);
-
-                value.operator_name = EXP;
-                node_init(&new_node_1, value, OPERATOR_TYPE, new_node);
-
-                new_node->left = dL;
-                new_node->right = new_node_1;
-                new_node_1->left = node_copy(node->left, new_node_1);
-                break;
+                return MUL_(dL, EXP_(cL));
             case LN:
-                value.operator_name = DIV;
-                node_init(&new_node, value, OPERATOR_TYPE, parent);
-
-                new_node->left = dL;
-                new_node->right = node_copy(node->left, new_node);
-                break;
+                return DIV_(dL, cL);
             case SQRT:
-                value.operator_name = DIV;
-                node_init(&new_node, value, OPERATOR_TYPE, parent);
-
-                value.operator_name = MUL;
-                node_init(&new_node_1, value, OPERATOR_TYPE, new_node);
-
-                value.number_value = 2;
-                node_init(&new_node_2, value, NUMBER_TYPE, new_node_1);
-
-                value.operator_name = SQRT;
-                node_init(&new_node_3, value, OPERATOR_TYPE, new_node_1);
-
-                new_node->left = dL;
-                new_node->right = new_node_1;
-                new_node_1->left = new_node_2;
-                new_node_1->right = new_node_3;
-                new_node_3->left = node_copy(node->left, new_node_3);
-                break;
+                return DIV_(dL, MUL_(NUM_(2), SQRT_(cL)));
             default:
                 printf("ERROR: unknown operator");
                 return NULL;
         }
     }
 
-
-    return new_node;
+    return NULL;
 }
 
-node_t* node_copy(node_t* node, node_t* parent)
+node_t* node_copy(node_t* node)
 {
     assert(node);
 
-    node_t* node_cpy = NULL;
+    node_t* left = NULL;
+    node_t* right = NULL;
 
-    if (node_init(&node_cpy, node->value, node->type, parent))
-        return NULL;
+    if (node->left != NULL) left = node_copy(node->left);
+    if (node->right != NULL) right = node_copy(node->right);
 
-    if (node->left != NULL) node_cpy->left = node_copy(node->left, node_cpy);
-
-    if (node->right != NULL) node_cpy->right = node_copy(node->right, node_cpy);
-
-    return node_cpy;
+    return node_init(node->value, node->type, left, right);
 }
 
 

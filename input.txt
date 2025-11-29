@@ -1,2 +1,3 @@
-(sqrt (+ (x nil nil)
-       (6 nil nil)) nil);
+(+ (^ (x nil nil)
+      (2 nil nil))
+   (2 nil nil))

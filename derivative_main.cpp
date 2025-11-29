@@ -12,7 +12,7 @@ const int NUMBER_OF_FILES = 1;
 int main(int argc, char* argv[])
 {
     tree_t* tree = NULL;
-    node_t* node_cpy = NULL;
+    //node_t* node_cpy = NULL;
     node_t* node_d = NULL;
     char derivating_var[] = "x";
 
@@ -22,16 +22,16 @@ int main(int argc, char* argv[])
 
     read_tree(argv[1], tree);
 
-    printf("%d\n", infix_read("infix_input.txt"));
+    //printf("%d\n", infix_read("infix_input.txt"));
 
-    node_cpy = node_copy(tree->root, NULL);
-    node_d = node_derivate(tree->root, tree, NULL, derivating_var);
+    //node_cpy = node_copy(tree->root, NULL);
+    node_d = node_derivate(tree->root, tree, derivating_var);
     node_d = equation_simplification(node_d, tree);
     tree_dump(node_d, tree);
 
     printf("%lf\n", node_calculate(tree->root, tree));
 
-    node_destroy(node_cpy);
+    //node_destroy(node_cpy);
     node_destroy(node_d);
     tree_destroy(tree);
 }

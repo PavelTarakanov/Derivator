@@ -57,14 +57,14 @@ tree_errors read_tree(char* const file_name, tree_t* tree)
         error = FILE_CLOSING_ERROR;
     }
 
-    tree->root = read_node(&buffer, NULL, tree);
+    tree->root = read_node(&buffer, tree);
 
     free(buffer_begin);
 
     return error;
 }
 
-node_t* read_node(char** buffer, node_t* parent, tree_t* tree)
+node_t* read_node(char** buffer, tree_t* tree)
 {
     assert(buffer);
     assert(*buffer);
@@ -73,6 +73,8 @@ node_t* read_node(char** buffer, node_t* parent, tree_t* tree)
     char str[MAX_LEN] = {0};
     node_t* node = NULL;
     tree_elem_t value = {};
+    node_t* left = NULL;
+    node_t* right = NULL;
 
     if (**buffer == '(')
     {
@@ -84,37 +86,54 @@ node_t* read_node(char** buffer, node_t* parent, tree_t* tree)
             while (**buffer != 'n' && **buffer != '(')
                 *buffer += sizeof(char);
 
-            node_init(&node, value, NUMBER_TYPE, parent);
+            left = read_node(buffer, tree);
+            right = read_node(buffer, tree);
+            node = node_init(value, NUMBER_TYPE, left, right);
         }
         else if (**buffer == '+')
         {
             value.operator_name = ADD;
-            node_init(&node, value, OPERATOR_TYPE, parent);
             *buffer += sizeof(char);
+
+            left = read_node(buffer, tree);
+            right = read_node(buffer, tree);
+            node = node_init(value, OPERATOR_TYPE, left, right);
         }
         else if (**buffer == '-')
         {
             value.operator_name = SUB;
-            node_init(&node, value, OPERATOR_TYPE, parent);
             *buffer += sizeof(char);
+
+            left = read_node(buffer, tree);
+            right = read_node(buffer, tree);
+            node = node_init(value, OPERATOR_TYPE, left, right);
         }
         else if (**buffer == '*')
         {
             value.operator_name = MUL;
-            node_init(&node, value, OPERATOR_TYPE, parent);
             *buffer += sizeof(char);
+
+            left = read_node(buffer, tree);
+            right = read_node(buffer, tree);;
+            node = node_init(value, OPERATOR_TYPE, left, right);
         }
         else if (**buffer == '/')
         {
             value.operator_name = DIV;
-            node_init(&node, value, OPERATOR_TYPE, parent);
             *buffer += sizeof(char);
+
+            left = read_node(buffer, tree);
+            right = read_node(buffer, tree);
+            node = node_init(value, OPERATOR_TYPE, left, right);
         }
         else if (**buffer == '^')
         {
             value.operator_name = DEG;
-            node_init(&node, value, OPERATOR_TYPE, parent);
             *buffer += sizeof(char);
+
+            left = read_node(buffer, tree);
+            right = read_node(buffer, tree);
+            node = node_init(value, OPERATOR_TYPE, left, right);
         }
         else
         {
@@ -129,16 +148,16 @@ node_t* read_node(char** buffer, node_t* parent, tree_t* tree)
                 }
             }
 
-            if (!check_operation(&node, str, parent))
-            {
-                make_new_var(&node, str, tree, parent);
-            }
 
-            *buffer += strlen(str) * sizeof(char);
+            node = check_operation(tree, str, buffer, left, right);
+            if (node == NULL)
+            {
+                node = make_new_var(str, tree, buffer, left, right);
+            }
         }
 
-        node->left = read_node(buffer, node, tree);
-        node->right = read_node(buffer, node, tree);
+        //node->left = read_node(buffer, node, tree);
+        //node->right = read_node(buffer, node, tree);
 
         if (**buffer == ')')
             *buffer += sizeof(char);
@@ -162,88 +181,111 @@ node_t* read_node(char** buffer, node_t* parent, tree_t* tree)
     }
 }
 
-bool check_operation(node_t** node, char* str, node_t* parent)
-{
-    assert(node);
-    assert(str);
-
-    tree_elem_t value = {};
-
-    if (strcmp(str, "sin") == 0)
-    {
-        value.operator_name = SIN;
-        node_init(node, value, OPERATOR_TYPE, parent);
-    }
-    else if (strcmp(str, "cos") == 0)
-    {
-        value.operator_name = COS;
-        node_init(node, value, OPERATOR_TYPE, parent);
-    }
-    else if (strcmp(str, "tg") == 0)
-    {
-        value.operator_name = TG;
-        node_init(node, value, OPERATOR_TYPE, parent);
-    }
-    else if (strcmp(str, "ctg") == 0)
-    {
-        value.operator_name = CTG;
-        node_init(node, value, OPERATOR_TYPE, parent);
-    }
-    else if (strcmp(str, "arcsin") == 0)
-    {
-        value.operator_name = ARCSIN;
-        node_init(node, value, OPERATOR_TYPE, parent);
-    }
-    else if (strcmp(str, "arccos") == 0)
-    {
-        value.operator_name = ARCCOS;
-        node_init(node, value, OPERATOR_TYPE, parent);
-    }
-    else if (strcmp(str, "arctg") == 0)
-    {
-        value.operator_name = ARCTG;
-        node_init(node, value, OPERATOR_TYPE, parent);
-    }
-    else if (strcmp(str, "arcctg") == 0)
-    {
-        value.operator_name = ARCCTG;
-        node_init(node, value, OPERATOR_TYPE, parent);
-    }
-    else if (strcmp(str, "exp") == 0)
-    {
-        value.operator_name = EXP;
-        node_init(node, value, OPERATOR_TYPE, parent);
-    }
-    else if (strcmp(str, "ln") == 0)
-    {
-        value.operator_name = LN;
-        node_init(node, value, OPERATOR_TYPE, parent);
-    }
-    else if (strcmp(str, "sqrt") == 0)
-    {
-        value.operator_name = SQRT;
-        node_init(node, value, OPERATOR_TYPE, parent);
-    }
-    else
-        return false;
-
-
-    return true;
-}
-
-tree_errors make_new_var(node_t** node, char* str, tree_t* tree, node_t* parent)
+node_t* check_operation(tree_t* tree, char* str, char** buffer, node_t* left, node_t* right)
 {
     assert(tree);
     assert(str);
 
     tree_elem_t value = {};
 
+    *buffer += strlen(str) * sizeof(char);
+
+    if (strcmp(str, "sin") == 0)
+    {
+        value.operator_name = SIN;
+        left = read_node(buffer, tree);
+        right = read_node(buffer, tree);
+        return node_init(value, OPERATOR_TYPE, left, right);
+    }
+    else if (strcmp(str, "cos") == 0)
+    {
+        value.operator_name = COS;
+        left = read_node(buffer, tree);
+        right = read_node(buffer, tree);
+        return node_init(value, OPERATOR_TYPE, left, right);
+    }
+    else if (strcmp(str, "tg") == 0)
+    {
+        value.operator_name = TG;
+        left = read_node(buffer, tree);
+        right = read_node(buffer, tree);
+        return node_init(value, OPERATOR_TYPE, left, right);
+    }
+    else if (strcmp(str, "ctg") == 0)
+    {
+        value.operator_name = CTG;
+        left = read_node(buffer, tree);
+        right = read_node(buffer, tree);
+        return node_init(value, OPERATOR_TYPE, left, right);
+    }
+    else if (strcmp(str, "arcsin") == 0)
+    {
+        value.operator_name = ARCSIN;
+        left = read_node(buffer, tree);
+        right = read_node(buffer, tree);
+        return node_init(value, OPERATOR_TYPE, left, right);
+    }
+    else if (strcmp(str, "arccos") == 0)
+    {
+        value.operator_name = ARCCOS;
+        left = read_node(buffer, tree);
+        right = read_node(buffer, tree);
+        return node_init(value, OPERATOR_TYPE, left, right);
+    }
+    else if (strcmp(str, "arctg") == 0)
+    {
+        value.operator_name = ARCTG;
+        left = read_node(buffer, tree);
+        right = read_node(buffer, tree);
+        return node_init(value, OPERATOR_TYPE, left, right);
+    }
+    else if (strcmp(str, "arcctg") == 0)
+    {
+        value.operator_name = ARCCTG;
+        left = read_node(buffer, tree);
+        right = read_node(buffer, tree);
+        return node_init(value, OPERATOR_TYPE, left, right);
+    }
+    else if (strcmp(str, "exp") == 0)
+    {
+        value.operator_name = EXP;
+        left = read_node(buffer, tree);
+        right = read_node(buffer, tree);
+        return node_init(value, OPERATOR_TYPE, left, right);
+    }
+    else if (strcmp(str, "ln") == 0)
+    {
+        value.operator_name = LN;
+        left = read_node(buffer, tree);
+        right = read_node(buffer, tree);
+        return node_init(value, OPERATOR_TYPE, left, right);
+    }
+    else if (strcmp(str, "sqrt") == 0)
+    {
+        value.operator_name = SQRT;
+        left = read_node(buffer, tree);
+        right = read_node(buffer, tree);
+        return node_init(value, OPERATOR_TYPE, left, right);
+    }
+
+    *buffer -= strlen(str) * sizeof(char);
+    return NULL;
+}
+node_t* make_new_var(char* str, tree_t* tree, char** buffer, node_t* left, node_t* right)
+{
+    assert(tree);
+    assert(str);
+
+    tree_elem_t value = {};
+    *buffer += strlen(str) * sizeof(char);
+
     for (int i = 0; i < tree->number_of_variables; i++)
         if (strcmp(str, tree->variable_list[i].var_name) == 0)
         {
             value.variable_number = i;
-            node_init(node, value, VARIABLE_TYPE, parent);
-            return NO_ERROR;
+            left = read_node(buffer, tree);
+            right = read_node(buffer, tree);
+            return node_init(value, VARIABLE_TYPE, left, right);
         }
 
     tree->variable_list[tree->number_of_variables].var_name = strdup(str);
@@ -251,12 +293,11 @@ tree_errors make_new_var(node_t** node, char* str, tree_t* tree, node_t* parent)
     value.variable_number = tree->number_of_variables;
 
     if (tree->variable_list[tree->number_of_variables].var_name == NULL)
-        return ALLOCATION_ERROR;
-
-    if (node_init(node, value, VARIABLE_TYPE, parent))
-        return ALLOCATION_ERROR;
+        return NULL;
 
     tree->number_of_variables++;
 
-    return NO_ERROR;
+    left = read_node(buffer, tree);
+    right = read_node(buffer, tree);
+    return node_init(value, VARIABLE_TYPE, left, right);
 }

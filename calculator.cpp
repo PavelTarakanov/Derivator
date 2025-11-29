@@ -58,7 +58,8 @@ double node_calculate(node_t* node, tree_t* tree)
         case SQRT:
             return sqrt(LV);
         default:
-            printf("ERROR: unknown operator");
+
+            printf("ERROR: unknown operator - %d\n", node->value.operator_name);
             return NAN;
         }
     }

@@ -19,28 +19,6 @@ tree_errors tree_dump(node_t* root, tree_t* tree)
 
     fprintf(dump_address, "digraph{\n");
 
-    if (node_pointer_dump(root, dump_address, root_address))
-        return DUMP_ERROR;
-
-    fprintf(dump_address, "}");
-
-    if (check_file_closing(dump_address))
-        return FILE_CLOSING_ERROR;
-
-    if (system("dot dump.txt -T png -o pointer_dump.png") != 0)
-        return GRAPH_MAKING_ERROR;
-
-    if (check_file_opening("dump.txt" , &dump_address, "w+"))
-        return FILE_OPENING_ERROR;
-
-    dump_address = NULL;
-    strcpy(root_address, "Z");
-
-    if (check_file_opening("dump.txt" , &dump_address, "w+"))
-        return FILE_OPENING_ERROR;
-
-    fprintf(dump_address, "digraph{\n");
-
     if (node_visual_dump(root, dump_address, root_address, tree))
         return DUMP_ERROR;
 
@@ -86,7 +64,7 @@ tree_errors node_latex_dump(node_t* node, tree_t* tree, FILE* const dump_address
 
             node_latex_dump(node->left, tree, dump_address);
 
-            switch(node->value.operator_name)
+            switch(node->value.operator_name)//TODO  -Wswitch-enum ругается
             {
                 case ADD:
                     fprintf(dump_address, "+");
@@ -101,7 +79,7 @@ tree_errors node_latex_dump(node_t* node, tree_t* tree, FILE* const dump_address
                     fprintf(dump_address, "^");
                     break;
                 default:
-                    printf("ERROR! Unknown operator!\n");
+                    printf("ERROR! Unknown operator - %d\n", node->value.operator_name);
                     return UNKNOWN_OPERATOR_ERROR;
             }
             node_latex_dump(node->right, tree, dump_address);
@@ -151,7 +129,7 @@ tree_errors node_latex_dump(node_t* node, tree_t* tree, FILE* const dump_address
                     fprintf(dump_address, "\\ln");
                     break;
                 default:
-                    printf("ERROR! Unknown operator!\n");
+                    printf("ERROR! Unknown operator - %d\n", node->value.operator_name);;
                     return UNKNOWN_OPERATOR_ERROR;
             }
 
@@ -178,7 +156,7 @@ tree_errors node_latex_dump(node_t* node, tree_t* tree, FILE* const dump_address
         }
         else
         {
-            printf("ERROR! Unknown operator");
+            printf("ERROR! Unknown operator - %d\n", node->value.operator_name);
             return UNKNOWN_OPERATOR_ERROR;
         }
     }
@@ -186,57 +164,6 @@ tree_errors node_latex_dump(node_t* node, tree_t* tree, FILE* const dump_address
         return UNKNOWN_OPERATOR_ERROR;
 
     return NO_ERROR;
-}
-
-tree_errors node_pointer_dump(node_t* node, FILE* const dump_address, char* node_way)
-{
-    assert(node);
-    assert(dump_address);
-
-    char *left_way = (char*) calloc(strlen(node_way) + 2, sizeof(char));
-    char *right_way = (char*) calloc(strlen(node_way) + 2 , sizeof(char));
-    tree_errors error = NO_ERROR;
-
-    if (left_way == NULL || right_way == NULL)
-        return ALLOCATION_ERROR;
-
-    strcpy(left_way, node_way);
-    strcpy(right_way, node_way);
-
-    if (node->left == NULL && node->right == NULL)
-        fprintf(dump_address, "\t%s[color=\"black\", style=\"filled\",fillcolor=\"lightgrey\", shape = record, label=\"{parent = %p | {left = %s | right = %s}}\"];\n",
-                node_way, node->parent, "NULL", "NULL");
-    else if (node->left == NULL)
-        fprintf(dump_address, "\t%s[color=\"black\", style=\"filled\",fillcolor=\"lightgrey\", shape = record, label=\"{parent = %p | {left = %s | right = %p}}\"];\n",
-            node_way, node->parent, "NULL" , node->right);
-    else if (node->right == NULL)
-        fprintf(dump_address, "\t%s[color=\"black\", style=\"filled\",fillcolor=\"lightgrey\", shape = record, label=\"{parent = %p | {left = %p | right = %s}}\"];\n",
-            node_way, node->parent, node->left, "NULL");
-    else
-        fprintf(dump_address, "\t%s[color=\"black\", style=\"filled\",fillcolor=\"lightgrey\", shape = record, label=\"{parent = %p | {left = %p | right = %p}}\"];\n",
-            node_way, node->parent,  node->left, node->right);
-
-    if (node->left != NULL)
-    {
-        fprintf(dump_address, "\t%s -> %s\n", node_way, strcat(left_way, "L"));
-        error = node_pointer_dump(node->left, dump_address, left_way);
-
-        if (error)
-            return error;
-    }
-    if (node->right != NULL)
-    {
-        fprintf(dump_address, "\t%s -> %s\n", node_way, strcat(right_way, "R"));
-        error = node_pointer_dump(node->right, dump_address, right_way);
-
-        if (error)
-            return error;
-    }
-
-    free(left_way);
-    free(right_way);
-
-    return error;
 }
 
 tree_errors node_visual_dump(node_t* node, FILE* const dump_address, char* node_way, tree_t* tree)
