@@ -77,24 +77,23 @@ tree_errors operator_print(FILE* dump_address, node_t* node);
 
 double node_calculate(node_t* node, tree_t* tree);
 
-tree_errors read_tree(char* const file_name, tree_t* tree);
-node_t* read_node(char** buffer, tree_t* tree);
-node_t* check_operation(tree_t* tree, char* str, char** buffer, node_t* left, node_t* right);
-node_t* make_new_var(char* str, tree_t* tree, char** buffer, node_t* left, node_t* right);
-
 bool check_file_founded(int argc, int number_of_files);
 
 node_t* node_derivate(node_t* node, const tree_t* const tree, const char* const derivating_variable);
 node_t* node_copy(node_t* node);
 
 
-int infix_read(char* file_name);
+node_t* infix_read(char* file_name, tree_t* tree);
 
-int get_g(char** buffer);
-int get_e(char** buffer);
-int get_t(char** buffer);
-int get_p(char** buffer);
-int get_n(char** buffer);
+node_t* get_g(char** buffer, tree_t* tree);
+node_t* get_e(char** buffer, tree_t* tree);
+node_t* get_t(char** buffer, tree_t* tree);
+node_t* get_d(char** buffer, tree_t* tree);
+node_t* get_p(char** buffer, tree_t* tree);
+node_t* get_n(char** buffer);
+node_t* get_v(char** buffer, tree_t* tree);
+node_t* get_f(char** buffer, tree_t* tree);
+node_t* make_new_var(char* str, tree_t* tree);
 
 node_t* equation_simplification(node_t* node, tree_t* tree);
 node_t* number_calculate(node_t* node, tree_t* tree);

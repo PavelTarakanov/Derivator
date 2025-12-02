@@ -12,8 +12,12 @@ const double INACCURACY = 10e-5;
 node_t* equation_simplification(node_t* node, tree_t* tree)
 {
     assert(node);
+    assert(tree);
 
     node = number_calculate(node, tree);
+    node = delete_zeros(&node, tree);
+    //node = number_calculate(node, tree);
+    //node = delete_zeros(&node, tree);
 
     return node;
 }
@@ -77,7 +81,7 @@ node_t* number_calculate(node_t* node, tree_t* tree)
     }
     return node;
 }
-/*
+
 node_t* delete_zeros(node_t** node, tree_t* tree)
 {
     assert(node);
@@ -86,6 +90,10 @@ node_t* delete_zeros(node_t** node, tree_t* tree)
     node_t* left = (*node)->left;
     node_t* right = (*node)->right;
     node_t* old_node = *node;
+
+    if ((*node)->left != NULL) delete_zeros(&(*node)->left, tree);
+    if ((*node)->right != NULL) delete_zeros(&(*node)->right, tree);
+
     if ((*node)->type == OPERATOR_TYPE)
     {
         if ((*node)->value.operator_name == ADD)
@@ -104,8 +112,26 @@ node_t* delete_zeros(node_t** node, tree_t* tree)
                 free(right);
                 free(old_node);
             }
-        }
+        }/*
+        else if ((*node)->value.operator_name == MUL)
+        {
+            if ((*node)->right->type == NUMBER_TYPE && (*node)->right->value.number_value < INACCURACY)
+            {
+                *node = (*node)->right;
+
+                node_destroy(left);
+                free(old_node);
+            }
+            else if ((*node)->left->type == NUMBER_TYPE && (*node)->left->value.number_value < INACCURACY)
+            {
+                *node = (*node)->left;
+
+                node_destroy(right);
+                free(old_node);
+            }
+        }*/
     }
+
     return *node;
 }
-*/
+

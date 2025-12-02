@@ -61,7 +61,6 @@ void tree_destroy(tree_t* tree)
 {
     assert(tree);
 
-
     if (tree->root != NULL)
         node_destroy(tree->root);
 

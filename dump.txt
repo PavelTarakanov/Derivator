@@ -1,19 +1,31 @@
 digraph{
 	Z[shape = record, style="filled",fillcolor="lightgreen", label="{+}"];
 	Z -> ZL
-	ZL[shape = record, style="filled",fillcolor="yellow", label="{0.000000}"];
+	ZL[shape = record, style="filled",fillcolor="lightgreen", label="{*}"];
+	ZL -> ZLL
+	ZLL[shape = record, style="filled",fillcolor="lightgreen", label="{^}"];
+	ZLL -> ZLLL
+	ZLLL[shape = record, style="filled",fillcolor="yellow", label="{10.000000}"];
+	ZLL -> ZLLR
+	ZLLR[shape = record, style="filled",fillcolor="yellow", label="{3.000000}"];
+	ZL -> ZLR
+	ZLR[shape = record, style="filled",fillcolor="lightgreen", label="{+}"];
+	ZLR -> ZLRL
+	ZLRL[shape = record, style="filled",fillcolor="lightgreen", label="{ln}"];
+	ZLRL -> ZLRLL
+	ZLRLL[shape = record, style="filled",fillcolor="yellow", label="{10.000000}"];
+	ZLR -> ZLRR
+	ZLRR[shape = record, style="filled",fillcolor="lightgreen", label="{*}"];
+	ZLRR -> ZLRRL
+	ZLRRL[shape = record, style="filled",fillcolor="lightgreen", label="{sin}"];
+	ZLRRL -> ZLRRLL
+	ZLRRLL[shape = record, style="filled",fillcolor="lightgreen", label="{+}"];
+	ZLRRLL -> ZLRRLLL
+	ZLRRLLL[shape = record, style="filled",fillcolor="lightblue", label="{x}"];
+	ZLRRLL -> ZLRRLLR
+	ZLRRLLR[shape = record, style="filled",fillcolor="yellow", label="{5.000000}"];
+	ZLRR -> ZLRRR
+	ZLRRR[shape = record, style="filled",fillcolor="yellow", label="{10.000000}"];
 	Z -> ZR
-	ZR[shape = record, style="filled",fillcolor="lightgreen", label="{*}"];
-	ZR -> ZRL
-	ZRL[shape = record, style="filled",fillcolor="yellow", label="{1.000000}"];
-	ZR -> ZRR
-	ZRR[shape = record, style="filled",fillcolor="lightgreen", label="{*}"];
-	ZRR -> ZRRL
-	ZRRL[shape = record, style="filled",fillcolor="yellow", label="{2.000000}"];
-	ZRR -> ZRRR
-	ZRRR[shape = record, style="filled",fillcolor="lightgreen", label="{^}"];
-	ZRRR -> ZRRRL
-	ZRRRL[shape = record, style="filled",fillcolor="lightblue", label="{x}"];
-	ZRRR -> ZRRRR
-	ZRRRR[shape = record, style="filled",fillcolor="yellow", label="{1.000000}"];
+	ZR[shape = record, style="filled",fillcolor="lightblue", label="{xw}"];
 }

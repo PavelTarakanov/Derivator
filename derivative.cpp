@@ -40,10 +40,9 @@ node_t* node_derivate(node_t* node, const tree_t* const tree, const char* const 
     else if (node->type == VARIABLE_TYPE)
     {
         if (strcmp(derivating_variable, tree->variable_list[node->value.variable_number].var_name) == 0)
-
             return node_init((tree_elem_t) {.number_value = 1}, NUMBER_TYPE, NULL, NULL);
         else
-            return node_init((tree_elem_t) {.number_value = 1}, NUMBER_TYPE, NULL, NULL);
+            return node_init((tree_elem_t) {.number_value = 0}, NUMBER_TYPE, NULL, NULL);
     }
     else if (node->type == OPERATOR_TYPE)
     {
@@ -111,3 +110,22 @@ node_t* node_copy(node_t* node)
 
 #undef dL
 #undef dR
+#undef cL
+#undef cR
+#undef NUM_
+#undef ADD_
+#undef SUB_
+#undef MUL_
+#undef DIV_
+#undef DEG_
+#undef SIN_
+#undef COS_
+#undef TG_
+#undef CTG_
+#undef ARCSIN_
+#undef ARCCOS_
+#undef ARCTG_
+#undef ARCCTG_
+#undef LN_
+#undef EXP_
+#undef SQRT_
