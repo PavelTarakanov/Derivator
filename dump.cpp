@@ -33,12 +33,12 @@ tree_errors tree_dump(node_t* root, tree_t* tree)
     if (check_file_opening("latex_dump.tex" , &dump_address, "w+"))
         return FILE_OPENING_ERROR;
 
-    fprintf(dump_address, "$");
+    fprintf(dump_address, "\\begin{equation}\n\t");
 
     if (node_latex_dump(root, tree, dump_address))
         return DUMP_ERROR;
 
-    fprintf(dump_address, "$");
+    fprintf(dump_address, "\n\\end{equation}\n");
 
     if (check_file_closing(dump_address))
         return FILE_CLOSING_ERROR;
@@ -53,18 +53,26 @@ tree_errors node_latex_dump(node_t* node, tree_t* tree, FILE* const dump_address
     assert(dump_address);
 
     if (node->type == NUMBER_TYPE)
-        fprintf(dump_address, "%lf", node->value.number_value);
+        fprintf(dump_address, "%.3lf", node->value.number_value);
     else if (node->type == VARIABLE_TYPE)
         fprintf(dump_address, "%s", tree->variable_list[node->value.variable_number].var_name);
     else if (node->type == OPERATOR_TYPE)
     {
         if (node->value.operator_name < SIN && node->value.operator_name != DIV)
         {
-            fprintf(dump_address, "(");
+            if (node->parent != NULL)
+            {
+                if (node->parent->value.operator_name >= MUL &&
+                    (node->value.operator_name == ADD || node->value.operator_name == SUB))
+                    fprintf(dump_address, "(");
+                if (node->parent->value.operator_name >= DEG &&
+                (node->value.operator_name == MUL || node->value.operator_name == DIV))
+                fprintf(dump_address, "(");
+            }
 
             node_latex_dump(node->left, tree, dump_address);
 
-            switch(node->value.operator_name)//TODO  -Wswitch-enum ругается
+            switch(node->value.operator_name)
             {
                 case ADD:
                     fprintf(dump_address, "+");
@@ -78,12 +86,34 @@ tree_errors node_latex_dump(node_t* node, tree_t* tree, FILE* const dump_address
                 case DEG:
                     fprintf(dump_address, "^");
                     break;
+                case DIV:
+                case SIN:
+                case COS:
+                case TG:
+                case CTG:
+                case ARCSIN:
+                case ARCCOS:
+                case ARCTG:
+                case ARCCTG:
+                case LN:
+                case SQRT:
+                case EXP:
+                case UNAR_MINUS:
                 default:
                     printf("ERROR! Unknown operator - %d\n", node->value.operator_name);
                     return UNKNOWN_OPERATOR_ERROR;
             }
             node_latex_dump(node->right, tree, dump_address);
-            fprintf(dump_address, ")");
+
+            if (node->parent != NULL)
+            {
+                if (node->parent->value.operator_name >= MUL &&
+                    (node->value.operator_name == ADD || node->value.operator_name == SUB))
+                    fprintf(dump_address, ")");
+                if (node->parent->value.operator_name >= DEG &&
+                (node->value.operator_name == MUL || node->value.operator_name == DIV))
+                fprintf(dump_address, ")");
+            }
         }
         else if (node->value.operator_name == DIV)
         {
@@ -102,39 +132,46 @@ tree_errors node_latex_dump(node_t* node, tree_t* tree, FILE* const dump_address
             switch(node->value.operator_name)
             {
                 case SIN:
-                    fprintf(dump_address, "\\sin(");
+                    fprintf(dump_address, "\\sin");
                     break;
                 case COS:
-                    fprintf(dump_address, "\\cos(");
+                    fprintf(dump_address, "\\cos");
                     break;
                 case TG:
-                    fprintf(dump_address, "\\tan(");
+                    fprintf(dump_address, "\\tan");
                     break;
                 case CTG:
-                    fprintf(dump_address, "\\cot(");
+                    fprintf(dump_address, "\\cot");
                     break;
                 case ARCSIN:
-                    fprintf(dump_address, "\\arcsin(");
+                    fprintf(dump_address, "\\arcsin");
                     break;
                 case ARCCOS:
-                    fprintf(dump_address, "\\arccos(");
+                    fprintf(dump_address, "\\arccos");
                     break;
                 case ARCTG:
-                    fprintf(dump_address, "\\arctan(");
+                    fprintf(dump_address, "\\arctan");
                     break;
                 case ARCCTG:
-                    fprintf(dump_address, "\\arccot(");
+                    fprintf(dump_address, "\\arccot");
                     break;
                 case LN:
                     fprintf(dump_address, "\\ln");
                     break;
+                case ADD:
+                case SUB:
+                case MUL:
+                case DIV:
+                case DEG:
+                case EXP:
+                case SQRT:
+                case UNAR_MINUS:
                 default:
                     printf("ERROR! Unknown operator - %d\n", node->value.operator_name);;
                     return UNKNOWN_OPERATOR_ERROR;
             }
 
             node_latex_dump(node->left, tree, dump_address);
-            fprintf(dump_address, ")");
         }
         else if (node->value.operator_name == EXP)
         {
@@ -153,6 +190,11 @@ tree_errors node_latex_dump(node_t* node, tree_t* tree, FILE* const dump_address
             fprintf(dump_address, "\\sqrt{");
             node_latex_dump(node->left, tree, dump_address);
             fprintf(dump_address, "}");
+        }
+        else if (node->value.operator_name == UNAR_MINUS)
+        {
+            fprintf(dump_address, "-");
+            node_latex_dump(node->left, tree, dump_address);
         }
         else
         {
@@ -289,6 +331,9 @@ tree_errors operator_print(FILE* dump_address, node_t* node)
             break;
         case SQRT:
             fprintf(dump_address, "label=\"{sqrt}\"]\n");
+            break;
+        case UNAR_MINUS:
+            fprintf(dump_address, "label=\"{-}\"]\n");
             break;
         default:
             printf("ERROR: unknown operator");

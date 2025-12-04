@@ -24,6 +24,7 @@ enum operations_t{
     EXP = 14,
     LN = 15,
     SQRT = 16,
+    UNAR_MINUS = 17,
 };
 
 union tree_elem_t{operations_t operator_name;
@@ -68,6 +69,7 @@ void tree_destroy(tree_t* tree);
 
 node_t* node_init(tree_elem_t value, type_t type, node_t* left, node_t* right);
 void node_destroy(node_t* node);
+void make_parents(node_t* node, node_t* parent);
 
 tree_errors tree_dump(node_t* root, tree_t* tree);
 tree_errors node_latex_dump(node_t* node, tree_t* tree, FILE* const dump_address);
@@ -82,12 +84,12 @@ bool check_file_founded(int argc, int number_of_files);
 node_t* node_derivate(node_t* node, const tree_t* const tree, const char* const derivating_variable);
 node_t* node_copy(node_t* node);
 
-
 node_t* infix_read(char* file_name, tree_t* tree);
 
 node_t* get_g(char** buffer, tree_t* tree);
 node_t* get_e(char** buffer, tree_t* tree);
 node_t* get_t(char** buffer, tree_t* tree);
+node_t* get_minus(char** buffer, tree_t* tree);
 node_t* get_d(char** buffer, tree_t* tree);
 node_t* get_p(char** buffer, tree_t* tree);
 node_t* get_n(char** buffer);

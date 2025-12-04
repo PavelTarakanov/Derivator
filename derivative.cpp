@@ -28,6 +28,7 @@
 #define LN_(left) node_init((tree_elem_t) {.operator_name = LN}, OPERATOR_TYPE, left, NULL)
 #define EXP_(left) node_init((tree_elem_t) {.operator_name = EXP}, OPERATOR_TYPE, left, NULL)
 #define SQRT_(left) node_init((tree_elem_t) {.operator_name = SQRT}, OPERATOR_TYPE, left, NULL)
+#define UNAR_MINUS_(left) node_init((tree_elem_t) {.operator_name = UNAR_MINUS}, OPERATOR_TYPE, left, NULL)
 
 node_t* node_derivate(node_t* node, const tree_t* const tree, const char* const derivating_variable)
 {
@@ -85,6 +86,8 @@ node_t* node_derivate(node_t* node, const tree_t* const tree, const char* const 
                 return DIV_(dL, cL);
             case SQRT:
                 return DIV_(dL, MUL_(NUM_(2), SQRT_(cL)));
+            case UNAR_MINUS:
+                return UNAR_MINUS_(dL);
             default:
                 printf("ERROR: unknown operator");
                 return NULL;
@@ -129,3 +132,4 @@ node_t* node_copy(node_t* node)
 #undef LN_
 #undef EXP_
 #undef SQRT_
+#undef UNAR_MINUS_

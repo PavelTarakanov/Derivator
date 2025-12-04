@@ -26,6 +26,7 @@
 #define LN_(left) node_init((tree_elem_t) {.operator_name = LN}, OPERATOR_TYPE, left, NULL)
 #define EXP_(left) node_init((tree_elem_t) {.operator_name = EXP}, OPERATOR_TYPE, left, NULL)
 #define SQRT_(left) node_init((tree_elem_t) {.operator_name = SQRT}, OPERATOR_TYPE, left, NULL)
+#define UNAR_MINUS_(left) node_init((tree_elem_t) {.operator_name = UNAR_MINUS}, OPERATOR_TYPE, left, NULL)
 
 const int START_STR_LEN = 10;
 
@@ -75,6 +76,9 @@ node_t* infix_read(char* file_name, tree_t* tree)
         printf("Error while closing file!");
 
     value = get_g(&buffer, tree);
+
+    make_parents(value, NULL);
+    
     free(buffer_begin);
 
     return value;
@@ -123,7 +127,7 @@ node_t* get_t(char** buffer, tree_t* tree)
     assert(buffer);
     assert(tree);
 
-    node_t* val = get_d(buffer, tree);
+    node_t* val = get_minus(buffer, tree);
     char op = '\0';
     node_t* val_2 = NULL;
 
@@ -132,7 +136,7 @@ node_t* get_t(char** buffer, tree_t* tree)
         op = **buffer;
         (*buffer)++;
 
-        val_2 = get_d(buffer, tree);
+        val_2 = get_minus(buffer, tree);
 
         if (op == '*')
             val = MUL_(val, val_2);
@@ -141,6 +145,18 @@ node_t* get_t(char** buffer, tree_t* tree)
     }
 
     return val;
+}
+
+node_t* get_minus(char** buffer, tree_t* tree)
+{
+    assert(buffer);
+    assert(tree);
+
+    if (**buffer != '-')
+        return get_d(buffer, tree);
+
+    (*buffer)++;
+    return UNAR_MINUS_(get_d(buffer, tree));
 }
 
 node_t* get_d(char** buffer, tree_t* tree)
@@ -366,3 +382,4 @@ node_t* make_new_var(char* str, tree_t* tree)
 #undef LN_
 #undef EXP_
 #undef SQRT_
+#undef UNAR_MINUS_

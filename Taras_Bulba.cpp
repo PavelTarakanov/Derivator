@@ -13,7 +13,6 @@ tree_errors tree_init(tree_t** tree)
 {
     assert(tree);
 
-
     (*tree) = (tree_t*) calloc(1, sizeof(tree_t));
     if ((*tree) == NULL)
         return ALLOCATION_ERROR;
@@ -69,4 +68,15 @@ void tree_destroy(tree_t* tree)
 
     free(tree->variable_list);
     free(tree);
+}
+
+void make_parents(node_t* node, node_t* parent)
+{
+    assert(node);
+
+    node->parent = parent;
+    if (node->left != NULL) make_parents(node->left, node);
+    if (node->right != NULL) make_parents(node->right, node);
+
+    return;
 }

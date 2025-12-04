@@ -3,29 +3,51 @@ digraph{
 	Z -> ZL
 	ZL[shape = record, style="filled",fillcolor="lightgreen", label="{*}"];
 	ZL -> ZLL
-	ZLL[shape = record, style="filled",fillcolor="lightgreen", label="{^}"];
-	ZLL -> ZLLL
-	ZLLL[shape = record, style="filled",fillcolor="yellow", label="{10.000000}"];
-	ZLL -> ZLLR
-	ZLLR[shape = record, style="filled",fillcolor="yellow", label="{3.000000}"];
+	ZLL[shape = record, style="filled",fillcolor="yellow", label="{0.000000}"];
 	ZL -> ZLR
-	ZLR[shape = record, style="filled",fillcolor="lightgreen", label="{+}"];
+	ZLR[shape = record, style="filled",fillcolor="lightgreen", label="{*}"];
 	ZLR -> ZLRL
-	ZLRL[shape = record, style="filled",fillcolor="lightgreen", label="{ln}"];
+	ZLRL[shape = record, style="filled",fillcolor="lightgreen", label="{sin}"];
 	ZLRL -> ZLRLL
-	ZLRLL[shape = record, style="filled",fillcolor="yellow", label="{10.000000}"];
+	ZLRLL[shape = record, style="filled",fillcolor="lightgreen", label="{+}"];
+	ZLRLL -> ZLRLLL
+	ZLRLLL[shape = record, style="filled",fillcolor="lightblue", label="{x}"];
+	ZLRLL -> ZLRLLR
+	ZLRLLR[shape = record, style="filled",fillcolor="yellow", label="{5.000000}"];
 	ZLR -> ZLRR
-	ZLRR[shape = record, style="filled",fillcolor="lightgreen", label="{*}"];
-	ZLRR -> ZLRRL
-	ZLRRL[shape = record, style="filled",fillcolor="lightgreen", label="{sin}"];
-	ZLRRL -> ZLRRLL
-	ZLRRLL[shape = record, style="filled",fillcolor="lightgreen", label="{+}"];
-	ZLRRLL -> ZLRRLLL
-	ZLRRLLL[shape = record, style="filled",fillcolor="lightblue", label="{x}"];
-	ZLRRLL -> ZLRRLLR
-	ZLRRLLR[shape = record, style="filled",fillcolor="yellow", label="{5.000000}"];
-	ZLRR -> ZLRRR
-	ZLRRR[shape = record, style="filled",fillcolor="yellow", label="{10.000000}"];
+	ZLRR[shape = record, style="filled",fillcolor="yellow", label="{10.000000}"];
 	Z -> ZR
-	ZR[shape = record, style="filled",fillcolor="lightblue", label="{xw}"];
+	ZR[shape = record, style="filled",fillcolor="lightgreen", label="{*}"];
+	ZR -> ZRL
+	ZRL[shape = record, style="filled",fillcolor="lightgreen", label="{+}"];
+	ZRL -> ZRLL
+	ZRLL[shape = record, style="filled",fillcolor="lightgreen", label="{*}"];
+	ZRLL -> ZRLLL
+	ZRLLL[shape = record, style="filled",fillcolor="lightgreen", label="{*}"];
+	ZRLLL -> ZRLLLL
+	ZRLLLL[shape = record, style="filled",fillcolor="yellow", label="{1.000000}"];
+	ZRLLL -> ZRLLLR
+	ZRLLLR[shape = record, style="filled",fillcolor="lightgreen", label="{cos}"];
+	ZRLLLR -> ZRLLLRL
+	ZRLLLRL[shape = record, style="filled",fillcolor="lightgreen", label="{+}"];
+	ZRLLLRL -> ZRLLLRLL
+	ZRLLLRLL[shape = record, style="filled",fillcolor="lightblue", label="{x}"];
+	ZRLLLRL -> ZRLLLRLR
+	ZRLLLRLR[shape = record, style="filled",fillcolor="yellow", label="{5.000000}"];
+	ZRLL -> ZRLLR
+	ZRLLR[shape = record, style="filled",fillcolor="yellow", label="{10.000000}"];
+	ZRL -> ZRLR
+	ZRLR[shape = record, style="filled",fillcolor="lightgreen", label="{*}"];
+	ZRLR -> ZRLRL
+	ZRLRL[shape = record, style="filled",fillcolor="yellow", label="{0.000000}"];
+	ZRLR -> ZRLRR
+	ZRLRR[shape = record, style="filled",fillcolor="lightgreen", label="{sin}"];
+	ZRLRR -> ZRLRRL
+	ZRLRRL[shape = record, style="filled",fillcolor="lightgreen", label="{+}"];
+	ZRLRRL -> ZRLRRLL
+	ZRLRRLL[shape = record, style="filled",fillcolor="lightblue", label="{x}"];
+	ZRLRRL -> ZRLRRLR
+	ZRLRRLR[shape = record, style="filled",fillcolor="yellow", label="{5.000000}"];
+	ZR -> ZRR
+	ZRR[shape = record, style="filled",fillcolor="yellow", label="{1000.000000}"];
 }

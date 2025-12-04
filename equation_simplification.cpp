@@ -79,6 +79,7 @@ node_t* number_calculate(node_t* node, tree_t* tree)
             }
         }
     }
+
     return node;
 }
 
@@ -117,19 +118,38 @@ node_t* delete_zeros(node_t** node, tree_t* tree)
         {
             if ((*node)->right->type == NUMBER_TYPE && (*node)->right->value.number_value < INACCURACY)
             {
-                *node = (*node)->right;
+                (*node)->type = NUMBER_TYPE;
+                (*node)->value.number_value = 0;
+                (*node)->left = NULL;
+                (*node)->right = NULL;
 
                 node_destroy(left);
-                free(old_node);
+                node_destroy(right);
             }
             else if ((*node)->left->type == NUMBER_TYPE && (*node)->left->value.number_value < INACCURACY)
             {
-                *node = (*node)->left;
+                (*node)->type = NUMBER_TYPE;
+                (*node)->value.number_value = 0;
+                (*node)->left = NULL;
+                (*node)->right = NULL;
 
+                node_destroy(left);
                 node_destroy(right);
-                free(old_node);
             }
         }*/
+        else if ((*node)->value.operator_name == DIV)
+        {
+            if ((*node)->left->type == NUMBER_TYPE && (*node)->left->value.number_value < INACCURACY)
+            {
+                (*node)->type = NUMBER_TYPE;
+                (*node)->value.number_value = 0;
+                (*node)->left = NULL;
+                (*node)->right = NULL;
+
+                node_destroy(left);
+                node_destroy(right);
+            }
+        }
     }
 
     return *node;

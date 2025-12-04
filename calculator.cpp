@@ -57,6 +57,8 @@ double node_calculate(node_t* node, tree_t* tree)
             return log(LV);
         case SQRT:
             return sqrt(LV);
+        case UNAR_MINUS:
+            return - LV;
         default:
 
             printf("ERROR: unknown operator - %d\n", node->value.operator_name);

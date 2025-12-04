@@ -23,7 +23,8 @@ int main(int argc, char* argv[])
 
     node_d = node_derivate(tree->root, tree, derivating_var);
     node_d = equation_simplification(node_d, tree);
-    tree_dump(tree->root, tree);
+    make_parents(node_d, NULL);
+    tree_dump(node_d, tree);
 
     printf("%lf\n", node_calculate(tree->root, tree));
 
