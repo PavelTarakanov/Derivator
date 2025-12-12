@@ -72,33 +72,17 @@ void node_destroy(node_t* node);
 void make_parents(node_t* node, node_t* parent);
 
 tree_errors tree_dump(node_t* root, tree_t* tree);
-tree_errors node_latex_dump(node_t* node, tree_t* tree, FILE* const dump_address);
-tree_errors node_visual_dump(node_t* node, FILE* const dump_address, char* node_way, tree_t* tree);
-tree_errors print_label(FILE* dump_address, node_t* node, tree_t* tree);
-tree_errors operator_print(FILE* dump_address, node_t* node);
+tree_errors node_latex_dump(node_t* node, const tree_t* tree, FILE* const dump_address);
 
 double node_calculate(node_t* node, tree_t* tree);
 
 bool check_file_founded(int argc, int number_of_files);
 
-node_t* node_derivate(node_t* node, const tree_t* const tree, const char* const derivating_variable);
-node_t* node_copy(node_t* node);
+tree_errors derivator(tree_t* tree);
+tree_errors Teilor(tree_t* tree);
 
 node_t* infix_read(char* file_name, tree_t* tree);
 
-node_t* get_g(char** buffer, tree_t* tree);
-node_t* get_e(char** buffer, tree_t* tree);
-node_t* get_t(char** buffer, tree_t* tree);
-node_t* get_minus(char** buffer, tree_t* tree);
-node_t* get_d(char** buffer, tree_t* tree);
-node_t* get_p(char** buffer, tree_t* tree);
-node_t* get_n(char** buffer);
-node_t* get_v(char** buffer, tree_t* tree);
-node_t* get_f(char** buffer, tree_t* tree);
-node_t* make_new_var(char* str, tree_t* tree);
-
 node_t* equation_simplification(node_t* node, tree_t* tree);
-node_t* number_calculate(node_t* node, tree_t* tree);
-node_t* delete_zeros(node_t** node, tree_t* tree);
 
 #endif //DERIVATIVE_H

@@ -28,6 +28,17 @@
 #define SQRT_(left) node_init((tree_elem_t) {.operator_name = SQRT}, OPERATOR_TYPE, left, NULL)
 #define UNAR_MINUS_(left) node_init((tree_elem_t) {.operator_name = UNAR_MINUS}, OPERATOR_TYPE, left, NULL)
 
+static node_t* get_g(char** buffer, tree_t* tree);
+static node_t* get_e(char** buffer, tree_t* tree);
+static node_t* get_t(char** buffer, tree_t* tree);
+static node_t* get_minus(char** buffer, tree_t* tree);
+static node_t* get_d(char** buffer, tree_t* tree);
+static node_t* get_p(char** buffer, tree_t* tree);
+static node_t* get_n(char** buffer);
+static node_t* get_v(char** buffer, tree_t* tree);
+static node_t* get_f(char** buffer, tree_t* tree);
+static node_t* make_new_var(char* str, tree_t* tree);
+
 const int START_STR_LEN = 10;
 
 node_t* infix_read(char* file_name, tree_t* tree)
@@ -56,9 +67,9 @@ node_t* infix_read(char* file_name, tree_t* tree)
 
     for (int i = 0; i < statistics.st_size; i++)
     {
-        symbol = fgetc(input_address);
+        symbol = (char) fgetc(input_address);
 
-        if (isgraph(symbol) || symbol < 0)//для русского
+        if (isgraph(symbol))
         {
             buffer[buffer_len] = symbol;
             buffer_len++;
@@ -78,7 +89,7 @@ node_t* infix_read(char* file_name, tree_t* tree)
     value = get_g(&buffer, tree);
 
     make_parents(value, NULL);
-    
+
     free(buffer_begin);
 
     return value;
@@ -321,7 +332,6 @@ node_t* get_v(char** buffer, tree_t* tree)
 
     while (('a' <= **buffer && **buffer <= 'z') || ('A' <= **buffer && **buffer <= 'Z') || **buffer == '_')
     {
-        //printf("%c\n", **buffer);
         if (i == str_len)
         {
             str_len *= 2;
@@ -340,8 +350,6 @@ node_t* get_v(char** buffer, tree_t* tree)
         return NULL;
     }
 
-    //printf("buffer after get_v = %s\n", *buffer);
-
     return make_new_var(var, tree);
 }
 
@@ -352,7 +360,10 @@ node_t* make_new_var(char* str, tree_t* tree)
 
     for (int i = 0; i < tree->number_of_variables; i++)
         if (strcmp(str, tree->variable_list[i].var_name) == 0)
+        {
+            free(str);
             return VAR_(i);
+        }
 
     tree->variable_list[tree->number_of_variables].var_name = strdup(str);
 

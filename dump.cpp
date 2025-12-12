@@ -7,20 +7,25 @@
 #include "file_using.h"
 #include "derivative.h"
 
+static tree_errors node_visual_dump(node_t* node, FILE* const dump_address, char* node_way, tree_t* tree);
+static tree_errors print_label(FILE* dump_address, node_t* node, tree_t* tree);
+static tree_errors operator_print(FILE* dump_address, node_t* node);
+
+
 tree_errors tree_dump(node_t* root, tree_t* tree)
 {
     assert(root);
+    assert(tree);
 
     FILE* dump_address = NULL;
-    char root_address[10] = "Z";
+    char root_address[100] = "Z";
 
     if (check_file_opening("dump.txt" , &dump_address, "w+"))
         return FILE_OPENING_ERROR;
 
     fprintf(dump_address, "digraph{\n");
 
-    if (node_visual_dump(root, dump_address, root_address, tree))
-        return DUMP_ERROR;
+    node_visual_dump(root, dump_address, root_address, tree);
 
     fprintf(dump_address, "}");
 
@@ -46,7 +51,7 @@ tree_errors tree_dump(node_t* root, tree_t* tree)
     return NO_ERROR;
 }
 
-tree_errors node_latex_dump(node_t* node, tree_t* tree, FILE* const dump_address)
+tree_errors node_latex_dump(node_t* node, const tree_t* tree, FILE* const dump_address)
 {
     assert(node);
     assert(tree);
@@ -84,7 +89,7 @@ tree_errors node_latex_dump(node_t* node, tree_t* tree, FILE* const dump_address
                     fprintf(dump_address, "*");
                     break;
                 case DEG:
-                    fprintf(dump_address, "^");
+                    fprintf(dump_address, "^{");
                     break;
                 case DIV:
                 case SIN:
@@ -103,7 +108,9 @@ tree_errors node_latex_dump(node_t* node, tree_t* tree, FILE* const dump_address
                     printf("ERROR! Unknown operator - %d\n", node->value.operator_name);
                     return UNKNOWN_OPERATOR_ERROR;
             }
+
             node_latex_dump(node->right, tree, dump_address);
+            if (node->value.operator_name == DEG) fprintf(dump_address, "}");
 
             if (node->parent != NULL)
             {
@@ -127,7 +134,7 @@ tree_errors node_latex_dump(node_t* node, tree_t* tree, FILE* const dump_address
 
             fprintf(dump_address, "}");
         }
-        else if (node->value.operator_name > DEG && node->value.operator_name < EXP)
+        else if (node->value.operator_name > DEG && node->value.operator_name != EXP && node->value.operator_name != SQRT)
         {
             switch(node->value.operator_name)
             {
@@ -158,6 +165,9 @@ tree_errors node_latex_dump(node_t* node, tree_t* tree, FILE* const dump_address
                 case LN:
                     fprintf(dump_address, "\\ln");
                     break;
+                case UNAR_MINUS:
+                    fprintf(dump_address, "-");
+                    break;
                 case ADD:
                 case SUB:
                 case MUL:
@@ -165,7 +175,6 @@ tree_errors node_latex_dump(node_t* node, tree_t* tree, FILE* const dump_address
                 case DEG:
                 case EXP:
                 case SQRT:
-                case UNAR_MINUS:
                 default:
                     printf("ERROR! Unknown operator - %d\n", node->value.operator_name);;
                     return UNKNOWN_OPERATOR_ERROR;
@@ -179,22 +188,11 @@ tree_errors node_latex_dump(node_t* node, tree_t* tree, FILE* const dump_address
             node_latex_dump(node->left, tree, dump_address);
             fprintf(dump_address, "}");
         }
-        else if(node->value.operator_name == LN)
-        {
-            fprintf(dump_address, "\\ln{");
-            node_latex_dump(node->left, tree, dump_address);
-            fprintf(dump_address, "}");
-        }
         else if (node->value.operator_name == SQRT)
         {
             fprintf(dump_address, "\\sqrt{");
             node_latex_dump(node->left, tree, dump_address);
             fprintf(dump_address, "}");
-        }
-        else if (node->value.operator_name == UNAR_MINUS)
-        {
-            fprintf(dump_address, "-");
-            node_latex_dump(node->left, tree, dump_address);
         }
         else
         {
@@ -212,6 +210,8 @@ tree_errors node_visual_dump(node_t* node, FILE* const dump_address, char* node_
 {
     assert(node);
     assert(dump_address);
+    assert(node_way);
+    assert(tree);
 
     char *left_way = (char*) calloc(strlen(node_way) + 2, sizeof(char));
     char *right_way = (char*) calloc(strlen(node_way) + 2 , sizeof(char));
@@ -263,6 +263,7 @@ tree_errors print_label(FILE* dump_address, node_t* node, tree_t* tree)
 {
     assert(dump_address);
     assert(node);
+    assert(tree);
 
     if (node->type == NUMBER_TYPE)
         fprintf(dump_address, "label=\"{%lf}\"];\n", node->value.number_value);

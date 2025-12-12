@@ -7,8 +7,8 @@
 #include "file_using.h"
 #include "derivative.h"
 
-#define dL node_derivate(node->left, tree, derivating_variable)
-#define dR node_derivate(node->right, tree, derivating_variable)
+#define dL node_derivate(node->left, tree, derivating_variable, output_address)
+#define dR node_derivate(node->right, tree, derivating_variable, output_address)
 #define cL node_copy(node->left)
 #define cR node_copy(node->right)
 #define NUM_(value) node_init((tree_elem_t) {.number_value = value}, NUMBER_TYPE, NULL, NULL)
@@ -30,71 +30,150 @@
 #define SQRT_(left) node_init((tree_elem_t) {.operator_name = SQRT}, OPERATOR_TYPE, left, NULL)
 #define UNAR_MINUS_(left) node_init((tree_elem_t) {.operator_name = UNAR_MINUS}, OPERATOR_TYPE, left, NULL)
 
-node_t* node_derivate(node_t* node, const tree_t* const tree, const char* const derivating_variable)
+static node_t* node_derivate(node_t* node, const tree_t* const tree, const char* const derivating_variable, FILE* output_address);
+static node_t* node_copy(node_t* node);
+static double fac(int n);
+tree_errors derivator(tree_t* tree)
+{
+    assert(tree);
+
+    int derivate_number = 0;
+    FILE* output_address = NULL;
+    char derivating_var[256] = "";
+    node_t* old_node = NULL;
+
+    printf("Введите номер производной\n");
+    while (scanf("%d", &derivate_number) != 1)
+        printf("Введите номер производной\n");
+
+    printf("Введите переменную дифференцирования, название переменной не должно содержать больше 255 символов\n");
+    scanf("%255s", derivating_var);
+
+    printf("Ведите значения переменных в точке дифференцирования\n");
+    for (int i = 0; i < tree->number_of_variables; i++)
+    {
+        printf("%s = ", tree->variable_list[i].var_name);
+        scanf("%lf", &(tree->variable_list[i].var_value));
+    }
+    if (check_file_opening("derivating.tex" , &output_address, "w+"))
+        return FILE_OPENING_ERROR;
+
+    fprintf(output_address, "\\section*{Нахождение %d-й производной}\n", derivate_number);
+
+    for (int i = 1; i < derivate_number + 1; i++)
+    {
+        fprintf(output_address, "\\subsection*{Найдём %d-ю производную}\n", i);
+        old_node = tree->root;
+        tree->root = node_derivate(tree->root, tree, derivating_var, output_address);
+        tree->root = equation_simplification(tree->root, tree);
+        make_parents(tree->root, NULL);
+        node_destroy(old_node);
+    }
+
+    if (check_file_closing(output_address))
+        return FILE_CLOSING_ERROR;
+
+    tree_dump(tree->root, tree);
+
+    printf("%lf\n", node_calculate(tree->root, tree));
+    return NO_ERROR;
+}
+
+node_t* node_derivate(node_t* node, const tree_t* const tree, const char* const derivating_variable, FILE* output_address)
 {
     assert(node);
     assert(tree);
     assert(derivating_variable);
 
+    node_t* new_node = NULL;
+
     if (node->type == NUMBER_TYPE)
-        return node_init((tree_elem_t) {.number_value = 0}, NUMBER_TYPE, NULL, NULL);
+        new_node = NUM_(0);
     else if (node->type == VARIABLE_TYPE)
     {
         if (strcmp(derivating_variable, tree->variable_list[node->value.variable_number].var_name) == 0)
-            return node_init((tree_elem_t) {.number_value = 1}, NUMBER_TYPE, NULL, NULL);
+            new_node = NUM_(1);
         else
-            return node_init((tree_elem_t) {.number_value = 0}, NUMBER_TYPE, NULL, NULL);
+            new_node = NUM_(0);
     }
     else if (node->type == OPERATOR_TYPE)
     {
         switch(node->value.operator_name)
         {
             case ADD:
-                return ADD_(dR, dL);
+                new_node = ADD_(dR, dL);
+                break;
             case SUB:
-                return  SUB_(dR, dL);
+                new_node =  SUB_(dR, dL);
+                break;
             case MUL:
-                return ADD_(MUL_(dL, cR), MUL_(dR, cL));
+                new_node = ADD_(MUL_(dL, cR), MUL_(dR, cL));
+                break;
             case DIV:
-                return DIV_(SUB_(MUL_(dL, cR), MUL_(dR, cL)), DEG_(cR, NUM_(2)));
+                new_node = DIV_(SUB_(MUL_(dL, cR), MUL_(dR, cL)), DEG_(cR, NUM_(2)));
+                break;
             case DEG:
                 if (node->left->type == NUMBER_TYPE)
-                    return MUL_(dR, MUL_(LN_(cL), DEG_(cL, cR)));
+                    new_node = MUL_(dR, MUL_(LN_(cL), DEG_(cL, cR)));
                 else if (node->right->type == NUMBER_TYPE)
-                    return MUL_(dL, MUL_(cR, DEG_(cL, SUB_(cR, NUM_(1)))));
+                    new_node = MUL_(dL, MUL_(cR, DEG_(cL, SUB_(cR, NUM_(1)))));
                 else
-                    return NULL;//TODO
+                    new_node = MUL_(DEG_(cL, cR), ADD_(MUL_(dR, LN_(cL)), MUL_(cR, DIV_(dL, cL))));
+                break;
             case SIN:
-                return MUL_(dL, COS_(cL));
+                new_node = MUL_(dL, COS_(cL));
+                break;
             case COS:
-                return MUL_(dL, MUL_(NUM_(-1), SIN_(cL)));
+                new_node = MUL_(dL, MUL_(NUM_(-1), SIN_(cL)));
+                break;
             case TG:
-                return DIV_(dL, DEG_(COS_(cL), NUM_(2)));
+                new_node = DIV_(dL, DEG_(COS_(cL), NUM_(2)));
+                break;
             case CTG:
-                return MUL_(dL, DIV_(NUM_(-1), DEG_(SIN_(cL), NUM_(2))));
+                new_node = MUL_(dL, DIV_(NUM_(-1), DEG_(SIN_(cL), NUM_(2))));
+                break;
             case ARCSIN:
-                return DIV_(dL, SQRT_(SUB_(NUM_(1), DEG_(cL, NUM_(2)))));
+                new_node = DIV_(dL, SQRT_(SUB_(NUM_(1), DEG_(cL, NUM_(2)))));
+                break;
             case ARCCOS:
-                return MUL_(NUM_(-1), DIV_(dL, SQRT_(SUB_(NUM_(1), DEG_(cL, NUM_(2))))));
+                new_node = MUL_(NUM_(-1), DIV_(dL, SQRT_(SUB_(NUM_(1), DEG_(cL, NUM_(2))))));
+                break;
             case ARCTG:
-                return DIV_(dL, ADD_(NUM_(1), DEG_(cL, NUM_(2))));
+                new_node = DIV_(dL, ADD_(NUM_(1), DEG_(cL, NUM_(2))));
+                break;
             case ARCCTG:
-                return MUL_(NUM_(-1), DIV_(dL, ADD_(NUM_(1), DEG_(cL, NUM_(2)))));
+                new_node = MUL_(NUM_(-1), DIV_(dL, ADD_(NUM_(1), DEG_(cL, NUM_(2)))));
+                break;
             case EXP:
-                return MUL_(dL, EXP_(cL));
+                new_node = MUL_(dL, EXP_(cL));
+                break;
             case LN:
-                return DIV_(dL, cL);
+                new_node = DIV_(dL, cL);
+                break;
             case SQRT:
-                return DIV_(dL, MUL_(NUM_(2), SQRT_(cL)));
+                new_node = DIV_(dL, MUL_(NUM_(2), SQRT_(cL)));
+                break;
             case UNAR_MINUS:
-                return UNAR_MINUS_(dL);
+                new_node = UNAR_MINUS_(dL);
+                break;
             default:
                 printf("ERROR: unknown operator");
-                return NULL;
+                new_node = NULL;
         }
     }
+    fprintf(output_address, "\\begin{equation}\n"
+                            "\t \\frac{d}{dx}(");
 
-    return NULL;
+    node_latex_dump(node, tree, output_address);
+    fprintf(output_address, ") = ");
+    node_latex_dump(new_node, tree, output_address);
+
+    fprintf(output_address, "\n\\end{equation}\n");
+
+    if (new_node == NULL)
+        printf("ERROR while derivating!\n");
+
+    return new_node;
 }
 
 node_t* node_copy(node_t* node)
@@ -110,6 +189,77 @@ node_t* node_copy(node_t* node)
     return node_init(node->value, node->type, left, right);
 }
 
+tree_errors Teilor(tree_t* tree)
+{
+    assert(tree);
+
+    FILE* teilor_dump_address = NULL;
+    FILE* derivating_dump_address = NULL;
+    node_t* old_node = tree->root;
+    int decomposition_degree = 0;
+    char decomposition_var[256] = "";
+
+    if (check_file_opening("teilor_dump.tex" , &teilor_dump_address, "w+"))
+        return FILE_OPENING_ERROR;
+
+    if (check_file_opening("derivating.tex" , &derivating_dump_address, "w+"))
+        return FILE_OPENING_ERROR;
+
+    fprintf(teilor_dump_address, "\\begin{equation}\n\t");
+
+    if (node_latex_dump(tree->root, tree, teilor_dump_address))
+        return DUMP_ERROR;
+
+    fprintf(teilor_dump_address, " = ");
+
+    printf("Введите степень разложения: ");
+    scanf("%d", &decomposition_degree);
+
+    printf("Введите переменную разложения: ");
+    scanf("%255s", decomposition_var);
+
+    printf("Ведите значения переменных в точке разложения\n");
+    for (int i = 0; i < tree->number_of_variables; i++)
+    {
+        printf("%s = ", tree->variable_list[i].var_name);
+        scanf("%lf", &(tree->variable_list[i].var_value));
+    }
+
+    fprintf(teilor_dump_address, "%lf + ", node_calculate(tree->root, tree));
+
+    for (int i = 1; i < decomposition_degree; i++)
+    {
+        tree->root = node_derivate(tree->root, tree, decomposition_var, derivating_dump_address);
+        fprintf(teilor_dump_address, "%lf*(%s-%s_0)^%d + ",
+                node_calculate(tree->root, tree)/fac(i), decomposition_var, decomposition_var, i);
+        node_destroy(old_node);
+        old_node = tree->root;
+    }
+
+    fprintf(teilor_dump_address, "o(%s-%s_0)^%d", decomposition_var, decomposition_var, decomposition_degree);
+
+    fprintf(teilor_dump_address, "\n\\end{equation}\n");
+
+    if (check_file_closing(teilor_dump_address))
+        return FILE_CLOSING_ERROR;
+
+    if (check_file_closing(derivating_dump_address))
+        return FILE_CLOSING_ERROR;
+
+    return NO_ERROR;
+}
+
+double fac(int n)
+{
+    int fac = 1;
+
+    for (int i = 1; i <= n; i++)
+    {
+        fac *= i;
+    }
+
+    return (double) fac;
+}
 
 #undef dL
 #undef dR

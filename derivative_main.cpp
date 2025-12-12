@@ -12,23 +12,17 @@ const int NUMBER_OF_FILES = 1;
 int main(int argc, char* argv[])
 {
     tree_t* tree = NULL;
-    node_t* node_d = NULL;
-    char derivating_var[] = "x";
 
     if(check_file_founded(argc, NUMBER_OF_FILES))
         return FILES_NOT_FOUNDED_ERROR;
+
     tree_init(&tree);
 
     tree->root =  infix_read(argv[1], tree);
 
-    node_d = node_derivate(tree->root, tree, derivating_var);
-    node_d = equation_simplification(node_d, tree);
-    make_parents(node_d, NULL);
-    tree_dump(node_d, tree);
+    derivator(tree);
+    //Teilor(tree);
 
-    printf("%lf\n", node_calculate(tree->root, tree));
-
-    node_destroy(node_d);
     tree_destroy(tree);
 }
 
