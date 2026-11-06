@@ -2,10 +2,8 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
-#include <ctype.h>
 #include <sys/stat.h>
-#include "file_using.h"
-#include "derivative.h"
+#include "../include/derivative.h"
 
 const unsigned int VAR_LIST_LEN = 100;
 

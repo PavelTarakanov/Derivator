@@ -1,12 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <string.h>
-#include <ctype.h>
 #include <sys/stat.h>
 #include <math.h>
-#include "file_using.h"
-#include "derivative.h"
+#include "../include/derivative.h"
 
 #define LV node_calculate(node->left, tree)
 #define RV node_calculate(node->right, tree)

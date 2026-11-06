@@ -5,8 +5,8 @@
 #include <ctype.h>
 #include <sys/stat.h>
 #include <math.h>
-#include "file_using.h"
-#include "derivative.h"
+#include "../include/file_using.h"
+#include "../include/derivative.h"
 
 #define NUM_(value) node_init((tree_elem_t) {.number_value = value}, NUMBER_TYPE, NULL, NULL)
 #define VAR_(number) node_init((tree_elem_t) {.variable_number = number}, VARIABLE_TYPE, NULL, NULL)

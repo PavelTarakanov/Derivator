@@ -2,10 +2,9 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
-#include <ctype.h>
 #include <sys/stat.h>
-#include "file_using.h"
-#include "derivative.h"
+#include "../include/file_using.h"
+#include "../include/derivative.h"
 
 static tree_errors node_visual_dump(node_t* node, FILE* const dump_address, char* node_way, tree_t* tree);
 static tree_errors print_label(FILE* dump_address, node_t* node, tree_t* tree);

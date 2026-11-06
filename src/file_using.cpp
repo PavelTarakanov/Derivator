@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include "file_using.h"
+#include "../include/file_using.h"
 
 bool check_file_opening(const char * const input_address, FILE** file_ptr, const char* const access_rights)
 {
