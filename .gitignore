@@ -2,3 +2,4 @@ build/
 *.tex
 *.txt
 *.png
+.DS_Store
